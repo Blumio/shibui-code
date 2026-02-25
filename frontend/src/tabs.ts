@@ -123,3 +123,27 @@ export function serializeSnapshot(state: TabState): string {
 export function clearTabs(): TabState {
   return createInitialTabState();
 }
+
+export function switchToNextTab(state: TabState): TabState {
+  const activeIndex = state.tabs.findIndex((tab) => tab.id === state.activeTabId);
+  if (activeIndex === -1 || activeIndex >= state.tabs.length - 1) {
+    return state;
+  }
+
+  return {
+    ...state,
+    activeTabId: state.tabs[activeIndex + 1].id,
+  };
+}
+
+export function switchToPreviousTab(state: TabState): TabState {
+  const activeIndex = state.tabs.findIndex((tab) => tab.id === state.activeTabId);
+  if (activeIndex <= 0) {
+    return state;
+  }
+
+  return {
+    ...state,
+    activeTabId: state.tabs[activeIndex - 1].id,
+  };
+}

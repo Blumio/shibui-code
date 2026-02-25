@@ -29,6 +29,8 @@ import {
   createInitialTabState,
   serializeSnapshot,
   switchTabByShortcut,
+  switchToNextTab,
+  switchToPreviousTab,
   type TabState,
   updateTabContent,
   updateTabLanguage,
@@ -242,6 +244,16 @@ export class ShibuiApp {
         key: "Mod-9",
         run: () => this.switchTabByNumber(9),
       },
+      {
+        key: "Mod-ArrowLeft",
+        preventDefault: true,
+        run: () => this.switchToPreviousTab(),
+      },
+      {
+        key: "Mod-ArrowRight",
+        preventDefault: true,
+        run: () => this.switchToNextTab(),
+      },
     ];
   }
 
@@ -294,6 +306,18 @@ export class ShibuiApp {
     if (event.key.toLowerCase() === "h") {
       event.preventDefault();
       void this.openHelpWindow();
+      return;
+    }
+
+    if (event.key === "ArrowLeft") {
+      event.preventDefault();
+      this.switchToPreviousTab();
+      return;
+    }
+
+    if (event.key === "ArrowRight") {
+      event.preventDefault();
+      this.switchToNextTab();
       return;
     }
 
@@ -444,6 +468,26 @@ export class ShibuiApp {
     this.cancelTabRename();
     this.persistEditor();
     this.tabState = switchTabByShortcut(this.tabState, oneBasedIndex);
+    this.renderTabs();
+    this.applyActiveTabToEditor();
+    this.scheduleSnapshotSync();
+    return true;
+  }
+
+  private switchToNextTab(): boolean {
+    this.cancelTabRename();
+    this.persistEditor();
+    this.tabState = switchToNextTab(this.tabState);
+    this.renderTabs();
+    this.applyActiveTabToEditor();
+    this.scheduleSnapshotSync();
+    return true;
+  }
+
+  private switchToPreviousTab(): boolean {
+    this.cancelTabRename();
+    this.persistEditor();
+    this.tabState = switchToPreviousTab(this.tabState);
     this.renderTabs();
     this.applyActiveTabToEditor();
     this.scheduleSnapshotSync();

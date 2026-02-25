@@ -10,6 +10,8 @@ import {
   createTab,
   serializeSnapshot,
   switchTabByShortcut,
+  switchToNextTab,
+  switchToPreviousTab,
   updateTabContent,
   updateTabLanguage,
   updateTabTitle,
@@ -96,5 +98,17 @@ describe("tabs", () => {
     state = clearTabs();
     expect(state.tabs).toHaveLength(1);
     expect(state.activeTabId).toBe(1);
+  });
+
+  it("switches to next and previous tab", () => {
+    let state = addTab(createInitialTabState(), "python");
+    state = addTab(state, "go");
+    expect(state.activeTabId).toBe(3);
+
+    state = switchToPreviousTab(state);
+    expect(state.activeTabId).toBe(2);
+
+    state = switchToNextTab(state);
+    expect(state.activeTabId).toBe(3);
   });
 });
