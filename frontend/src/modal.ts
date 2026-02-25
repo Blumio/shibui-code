@@ -222,6 +222,7 @@ export async function openHelpModal(options: HelpModalOptions): Promise<void> {
   return new Promise<void>((resolve) => {
     const overlay = createElement("div", "modal-overlay");
     const modal = createElement("div", "modal-window");
+    modal.classList.add("modal-window-help");
     const title = createElement("div", "modal-title");
     const list = createElement("div", "modal-list");
 

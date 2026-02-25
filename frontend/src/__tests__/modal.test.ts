@@ -40,6 +40,7 @@ describe("modal", () => {
       ],
     });
 
+    expect(document.querySelector(".modal-window-help")).not.toBeNull();
     const rows = document.querySelectorAll(".modal-help-item");
     expect(rows.length).toBe(2);
     window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));

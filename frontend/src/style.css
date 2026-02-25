@@ -296,12 +296,13 @@ body,
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  padding-top: 12vh;
+  padding: min(12vh, 72px) 16px 16px;
   z-index: 999;
 }
 
 .modal-window {
   width: min(560px, 92vw);
+  max-height: calc(100vh - 32px);
   border-radius: 12px;
   border: 1px solid #2c3948;
   background: #161d25;
@@ -309,6 +310,17 @@ body,
   display: grid;
   grid-template-rows: auto auto minmax(120px, 46vh);
   overflow: hidden;
+}
+
+.modal-window-help {
+  width: min(680px, 92vw);
+  max-height: min(78vh, 620px);
+  grid-template-rows: auto minmax(0, 1fr);
+}
+
+.modal-window-help .modal-list {
+  min-height: 0;
+  overflow: auto;
 }
 
 .modal-window-compact {
