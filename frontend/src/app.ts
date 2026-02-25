@@ -454,6 +454,7 @@ export class ShibuiApp {
           this.editingTabTitle = input.value;
         });
         input.addEventListener("keydown", (event) => {
+          event.stopPropagation();
           if (event.key === "Enter") {
             event.preventDefault();
             this.commitTabRename(tab.id);
