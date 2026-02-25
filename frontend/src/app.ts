@@ -4,7 +4,12 @@ import type { Extension } from "@codemirror/state";
 import { EditorView, highlightActiveLineGutter, keymap, lineNumbers } from "@codemirror/view";
 
 import { fuzzyFilter } from "./fuzzy";
-import { isPrimaryModifier, resizeDirectionShortcut, shortcutDigit } from "./keybindings";
+import {
+  isPrimaryModifier,
+  resizeDirectionShortcut,
+  shouldHandleGlobalShortcut,
+  shortcutDigit,
+} from "./keybindings";
 import { diagnosticsExtension } from "./linting";
 import {
   languageExtension,
@@ -241,6 +246,10 @@ export class ShibuiApp {
   }
 
   private handleGlobalShortcuts(event: KeyboardEvent): void {
+    if (!shouldHandleGlobalShortcut(event)) {
+      return;
+    }
+
     const resizeDirection = resizeDirectionShortcut(event, this.isMac);
     if (resizeDirection !== null) {
       event.preventDefault();

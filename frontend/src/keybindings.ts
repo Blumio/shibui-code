@@ -14,6 +14,10 @@ export function shortcutDigit(event: KeyboardEvent): number | null {
   return Number(event.key);
 }
 
+export function shouldHandleGlobalShortcut(event: KeyboardEvent): boolean {
+  return !event.defaultPrevented;
+}
+
 export type ResizeDirection = "up" | "down" | "left" | "right";
 
 export function resizeDirectionShortcut(event: KeyboardEvent, isMac: boolean): ResizeDirection | null {

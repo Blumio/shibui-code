@@ -1,9 +1,14 @@
 import { describe, expect, it } from "vitest";
 
-import { isPrimaryModifier, resizeDirectionShortcut, shortcutDigit } from "../keybindings";
+import {
+  isPrimaryModifier,
+  resizeDirectionShortcut,
+  shouldHandleGlobalShortcut,
+  shortcutDigit,
+} from "../keybindings";
 
 function keyboardEvent(key: string, ctrlKey = false, metaKey = false): KeyboardEvent {
-  return new KeyboardEvent("keydown", { key, ctrlKey, metaKey });
+  return new KeyboardEvent("keydown", { key, ctrlKey, metaKey, cancelable: true });
 }
 
 describe("keybindings", () => {
@@ -26,5 +31,12 @@ describe("keybindings", () => {
     expect(resizeDirectionShortcut(keyboardEvent("End", true, false), true)).toBe("right");
     expect(resizeDirectionShortcut(keyboardEvent("PageUp", false, false), true)).toBeNull();
     expect(resizeDirectionShortcut(keyboardEvent("PageUp", true, false), false)).toBeNull();
+  });
+
+  it("skips global handling when event is already handled", () => {
+    const event = keyboardEvent("n", true, false);
+    expect(shouldHandleGlobalShortcut(event)).toBe(true);
+    event.preventDefault();
+    expect(shouldHandleGlobalShortcut(event)).toBe(false);
   });
 });
