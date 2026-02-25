@@ -12,7 +12,7 @@ import {
   languageOptions,
   type LanguageOption,
 } from "./language";
-import { openSearchModal, openTextInputModal } from "./modal";
+import { openHelpModal, openSearchModal, openTextInputModal } from "./modal";
 import { clearSnapshot, syncSnapshot } from "./native";
 import { emptyPlaceholderExtension, normalizePlaceholderInput } from "./placeholder";
 import {
@@ -192,6 +192,14 @@ export class ShibuiApp {
         },
       },
       {
+        key: "Mod-h",
+        preventDefault: true,
+        run: () => {
+          void this.openHelpWindow();
+          return true;
+        },
+      },
+      {
         key: "Mod-1",
         run: () => this.switchTabByNumber(1),
       },
@@ -262,6 +270,12 @@ export class ShibuiApp {
     if (event.key.toLowerCase() === "p") {
       event.preventDefault();
       void this.openPlaceholderConfig();
+      return;
+    }
+
+    if (event.key.toLowerCase() === "h") {
+      event.preventDefault();
+      void this.openHelpWindow();
       return;
     }
 
@@ -573,6 +587,32 @@ export class ShibuiApp {
         emptyPlaceholderExtension(this.emptyPagePlaceholder),
       ),
     });
+  }
+
+  private helpShortcuts(): Array<{ shortcut: string; description: string }> {
+    return [
+      { shortcut: "Cmd/Ctrl+N", description: "Create a new temporary tab." },
+      { shortcut: "Cmd/Ctrl+W", description: "Close the active tab." },
+      { shortcut: "Cmd/Ctrl+S", description: "Open Theme Search Mode." },
+      { shortcut: "Cmd/Ctrl+L", description: "Open language selection." },
+      { shortcut: "Cmd/Ctrl+P", description: "Configure empty-page placeholder text." },
+      { shortcut: "Cmd/Ctrl+H", description: "Show this help window." },
+      { shortcut: "Cmd/Ctrl+1..9", description: "Switch to tab by index." },
+      { shortcut: "Escape", description: "Close open modal dialogs." },
+    ];
+  }
+
+  private async openHelpWindow(): Promise<void> {
+    if (this.modalOpen) {
+      return;
+    }
+
+    this.modalOpen = true;
+    await openHelpModal({
+      title: "Keyboard Shortcuts",
+      shortcuts: this.helpShortcuts(),
+    });
+    this.modalOpen = false;
   }
 
   private scheduleSnapshotSync(): void {

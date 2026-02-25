@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { openTextInputModal } from "../modal";
+import { openHelpModal, openTextInputModal } from "../modal";
 
 describe("modal", () => {
   it("resolves with text on enter", async () => {
@@ -29,5 +29,20 @@ describe("modal", () => {
     input.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
 
     await expect(promise).resolves.toBeNull();
+  });
+
+  it("renders help shortcuts and closes on escape", async () => {
+    const promise = openHelpModal({
+      title: "Keyboard Shortcuts",
+      shortcuts: [
+        { shortcut: "Cmd/Ctrl+H", description: "Open help." },
+        { shortcut: "Cmd/Ctrl+N", description: "New tab." },
+      ],
+    });
+
+    const rows = document.querySelectorAll(".modal-help-item");
+    expect(rows.length).toBe(2);
+    window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+    await expect(promise).resolves.toBeUndefined();
   });
 });

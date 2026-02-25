@@ -13,6 +13,16 @@ export interface TextInputModalOptions {
   initialValue?: string;
 }
 
+export interface HelpShortcutItem {
+  shortcut: string;
+  description: string;
+}
+
+export interface HelpModalOptions {
+  title: string;
+  shortcuts: HelpShortcutItem[];
+}
+
 function createElement<K extends keyof HTMLElementTagNameMap>(
   tag: K,
   className: string,
@@ -151,5 +161,52 @@ export async function openTextInputModal(options: TextInputModalOptions): Promis
     document.body.appendChild(overlay);
     input.focus();
     input.setSelectionRange(input.value.length, input.value.length);
+  });
+}
+
+export async function openHelpModal(options: HelpModalOptions): Promise<void> {
+  return new Promise<void>((resolve) => {
+    const overlay = createElement("div", "modal-overlay");
+    const modal = createElement("div", "modal-window");
+    const title = createElement("div", "modal-title");
+    const list = createElement("div", "modal-list");
+
+    title.textContent = options.title;
+
+    options.shortcuts.forEach((item) => {
+      const row = createElement("div", "modal-help-item");
+      const shortcut = createElement("span", "modal-help-shortcut");
+      const description = createElement("span", "modal-help-description");
+
+      shortcut.textContent = item.shortcut;
+      description.textContent = item.description;
+
+      row.append(shortcut, description);
+      list.appendChild(row);
+    });
+
+    const cleanup = () => {
+      window.removeEventListener("keydown", handleKeydown);
+      overlay.remove();
+      resolve();
+    };
+
+    overlay.addEventListener("click", (event) => {
+      if (event.target === overlay) {
+        cleanup();
+      }
+    });
+
+    const handleKeydown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        cleanup();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeydown);
+    modal.append(title, list);
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
   });
 }

@@ -304,6 +304,27 @@ body,
   cursor: default;
 }
 
+.modal-help-item {
+  display: grid;
+  grid-template-columns: minmax(130px, 170px) 1fr;
+  gap: 10px;
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: rgba(19, 27, 37, 0.42);
+}
+
+.modal-help-shortcut {
+  color: #f1f6fc;
+  font-family: "Iosevka", "JetBrains Mono", "Fira Code", monospace;
+  font-size: 12px;
+}
+
+.modal-help-description {
+  color: #c9d9ea;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
 .theme-github-light,
 .theme-solarized-light {
   --chrome-bg: #eef2f7;
@@ -325,6 +346,21 @@ body,
 .theme-solarized-light {
   background: linear-gradient(180deg, #f8fafc 0%, #e9eef4 100%);
   color: #1f2a36;
+}
+
+.theme-github-light .modal-help-item,
+.theme-solarized-light .modal-help-item {
+  background: rgba(243, 246, 250, 0.86);
+}
+
+.theme-github-light .modal-help-shortcut,
+.theme-solarized-light .modal-help-shortcut {
+  color: #1f2a36;
+}
+
+.theme-github-light .modal-help-description,
+.theme-solarized-light .modal-help-description {
+  color: #415264;
 }
 
 @media (max-width: 640px) {
