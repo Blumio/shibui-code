@@ -53,8 +53,8 @@ body,
   display: flex;
   gap: 6px;
   overflow-x: auto;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+  scrollbar-width: thin;
+  -ms-overflow-style: auto;
   overscroll-behavior-x: contain;
   overscroll-behavior-y: none;
   touch-action: pan-x;
@@ -62,9 +62,16 @@ body,
 }
 
 .tabs::-webkit-scrollbar {
-  width: 0;
-  height: 0;
-  display: none;
+  height: 8px;
+}
+
+.tabs::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.tabs::-webkit-scrollbar-thumb {
+  background: rgba(124, 147, 171, 0.45);
+  border-radius: 999px;
 }
 
 .tab,
@@ -77,6 +84,7 @@ body,
 
 .tab {
   display: flex;
+  flex: 0 0 auto;
   align-items: center;
   gap: 8px;
   border-radius: 8px;
@@ -128,6 +136,7 @@ body,
 }
 
 .tab-new {
+  flex: 0 0 auto;
   width: 30px;
   height: 30px;
   border-radius: 8px;

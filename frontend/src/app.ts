@@ -510,12 +510,22 @@ export class ShibuiApp {
   }
 
   private handleTabStripWheel(event: WheelEvent): void {
+    const maxScroll = this.tabsElement.scrollWidth - this.tabsElement.clientWidth;
+    if (maxScroll <= 0) {
+      return;
+    }
+
     const delta = tabStripScrollDelta(event);
     if (delta === 0) {
       return;
     }
 
-    this.tabsElement.scrollLeft += delta;
+    const nextScroll = clampScrollPosition(this.tabsElement.scrollLeft + delta, maxScroll);
+    if (nextScroll === this.tabsElement.scrollLeft) {
+      return;
+    }
+
+    this.tabsElement.scrollLeft = nextScroll;
     event.preventDefault();
   }
 
@@ -883,4 +893,16 @@ export function tabStripScrollDelta(event: Pick<WheelEvent, "deltaX" | "deltaY">
   }
 
   return 0;
+}
+
+export function clampScrollPosition(nextValue: number, maxValue: number): number {
+  if (nextValue < 0) {
+    return 0;
+  }
+
+  if (nextValue > maxValue) {
+    return maxValue;
+  }
+
+  return nextValue;
 }

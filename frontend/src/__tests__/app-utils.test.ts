@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  clampScrollPosition,
   diagnosticsExtensionForMode,
   filterLanguageItems,
   languageExtensionForMode,
@@ -33,5 +34,11 @@ describe("app utility functions", () => {
 
   it("returns no diagnostics extension when analysis mode is disabled", () => {
     expect(diagnosticsExtensionForMode(false)).toEqual([]);
+  });
+
+  it("clamps scroll position to valid tab strip bounds", () => {
+    expect(clampScrollPosition(-10, 100)).toBe(0);
+    expect(clampScrollPosition(130, 100)).toBe(100);
+    expect(clampScrollPosition(24, 100)).toBe(24);
   });
 });
