@@ -65,11 +65,13 @@ function buildThemeExtension(palette: ThemePalette, isDark: boolean): Extension 
       ".cm-tooltip": {
         border: `1px solid ${palette.lineHighlight}`,
       },
-      ".cm-diagnostic.cm-diagnostic-warning": {
-        borderBottom: "2px solid #e7a94d",
+      ".cm-lintRange-warning": {
+        textDecoration: "underline 2px solid #e7be53",
+        textUnderlineOffset: "2px",
       },
-      ".cm-diagnostic.cm-diagnostic-error": {
-        borderBottom: "2px solid #f14c4c",
+      ".cm-lintRange-error": {
+        textDecoration: "underline 2px solid #E00000",
+        textUnderlineOffset: "2px",
       },
     },
     { dark: isDark },

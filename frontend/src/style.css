@@ -6,6 +6,13 @@
   --tab-fg: #9fb0c3;
   --tab-active-fg: #ecf2fa;
   --surface: #1e1e1e;
+  --lint-popover-bg: #727272;
+  --lint-popover-fg: #ffffff;
+  --lint-popover-border: transparent;
+  --lint-popover-shadow: rgba(0, 0, 0, 0.25);
+  --lint-accent-warning: #e7be53;
+  --lint-accent-error: #e00000;
+  --lint-opacity: 0.8;
 }
 
 * {
@@ -133,6 +140,80 @@ body,
   font-style: italic;
 }
 
+.cm-tooltip.cm-tooltip-lint,
+.cm-tooltip.cm-tooltip-hover {
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+}
+
+.cm-tooltip.cm-tooltip-lint .cm-diagnosticList,
+.cm-tooltip.cm-tooltip-hover .cm-diagnosticList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.cm-tooltip .cm-diagnostic {
+  position: relative;
+  margin: 0;
+  padding: 4px 16px;
+  line-height: 0.7;
+  border-radius: 11.5px;
+  border: None;
+  background: var(--lint-popover-bg);
+  color: var(--lint-popover-fg);
+  box-shadow: 0 4px 4px var(--lint-popover-shadow);
+  line-height: 1.3;
+  opacity: var(--lint-opacity);
+}
+
+.cm-tooltip.cm-tooltip-below .cm-diagnostic,
+.cm-tooltip:not(.cm-tooltip-above) .cm-diagnostic {
+  transform: translate(-0.1rem, 0.3rem);
+}
+
+.cm-tooltip.cm-tooltip-above .cm-diagnostic {
+  transform: translate(-0.1rem, -0.3rem);
+}
+
+.cm-tooltip .cm-diagnostic::before {
+  content: "";
+  position: absolute;
+  left: 0.6px;
+  top: -6px;
+  width: 13.95px;
+  height: 13.8px;
+  border-radius: 5px;
+  clip-path: polygon(50% 0, 0 100%, 100% 100%);
+  background: var(--lint-accent-error);
+  transform-origin: center top;
+}
+
+.cm-tooltip.cm-tooltip-above .cm-diagnostic::before {
+  top: auto;
+  bottom: -9.8px;
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  transform-origin: center bottom;
+}
+
+.cm-tooltip .cm-diagnostic.cm-diagnostic-warning {
+  background: var(--lint-popover-bg);
+}
+
+.cm-tooltip .cm-diagnostic.cm-diagnostic-warning::before {
+  background: var(--lint-accent-warning);
+}
+
+.cm-tooltip .cm-diagnostic.cm-diagnostic-error {
+  background: var(--lint-popover-bg);
+}
+
+.cm-tooltip .cm-diagnostic.cm-diagnostic-error::before {
+  background: var(--lint-accent-error);
+}
+
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -217,6 +298,13 @@ body,
   --tab-active-bg: #ffffff;
   --tab-fg: #516173;
   --tab-active-fg: #1f2a36;
+  --lint-popover-bg: #727272;
+  --lint-popover-fg: #ffffff;
+  --lint-popover-border: transparent;
+  --lint-popover-shadow: rgba(0, 0, 0, 0.15);
+  --lint-accent-warning: #c79223;
+  --lint-accent-error: #e00000;
+  --lint-opacity: 0.8;
 }
 
 .theme-github-light,
