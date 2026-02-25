@@ -1,4 +1,4 @@
-import { defaultLanguage, languageLabel } from "./language";
+import { defaultLanguage } from "./language";
 import type { LanguageId, SnapshotTab, TabModel } from "./types";
 
 export interface TabState {
@@ -90,9 +90,14 @@ export function updateTabContent(state: TabState, tabId: number, content: string
 export function updateTabLanguage(state: TabState, tabId: number, language: LanguageId): TabState {
   return {
     ...state,
-    tabs: state.tabs.map((tab) =>
-      tab.id === tabId ? { ...tab, language, title: `Tab ${tab.id} (${languageLabel(language)})` } : tab,
-    ),
+    tabs: state.tabs.map((tab) => (tab.id === tabId ? { ...tab, language } : tab)),
+  };
+}
+
+export function updateTabTitle(state: TabState, tabId: number, title: string): TabState {
+  return {
+    ...state,
+    tabs: state.tabs.map((tab) => (tab.id === tabId ? { ...tab, title } : tab)),
   };
 }
 

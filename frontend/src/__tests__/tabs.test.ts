@@ -12,6 +12,7 @@ import {
   switchTabByShortcut,
   updateTabContent,
   updateTabLanguage,
+  updateTabTitle,
 } from "../tabs";
 
 describe("tabs", () => {
@@ -68,10 +69,15 @@ describe("tabs", () => {
     expect(state.tabs[0].content).toBe("print('x')");
   });
 
-  it("updates language and title", () => {
+  it("updates language", () => {
     const state = updateTabLanguage(createInitialTabState(), 1, "rust");
     expect(state.tabs[0].language).toBe("rust");
-    expect(state.tabs[0].title).toContain("Rust");
+    expect(state.tabs[0].title).toBe("Tab 1");
+  });
+
+  it("updates title", () => {
+    const state = updateTabTitle(createInitialTabState(), 1, "Practice Tab");
+    expect(state.tabs[0].title).toBe("Practice Tab");
   });
 
   it("returns active tab", () => {

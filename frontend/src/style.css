@@ -90,6 +90,20 @@ body,
   letter-spacing: 0.01em;
 }
 
+.tab-editing {
+  cursor: default;
+}
+
+.tab-title-input {
+  width: 170px;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font-size: 12px;
+  letter-spacing: 0.01em;
+  outline: none;
+}
+
 .tab-close {
   width: 18px;
   height: 18px;

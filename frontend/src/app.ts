@@ -27,6 +27,7 @@ import {
   type TabState,
   updateTabContent,
   updateTabLanguage,
+  updateTabTitle,
 } from "./tabs";
 import { findThemeLoader, themeListItems } from "./theme-registry";
 import defaultTheme from "./themes/vscode-dark-plus";
@@ -54,6 +55,10 @@ export class ShibuiApp {
   private currentTheme: ThemeSpec = defaultTheme;
 
   private emptyPagePlaceholder = "";
+
+  private editingTabId: number | null = null;
+
+  private editingTabTitle = "";
 
   private modalOpen = false;
 
@@ -311,6 +316,48 @@ export class ShibuiApp {
       title.className = "tab-title";
       title.textContent = tab.title;
 
+      if (this.editingTabId === tab.id) {
+        button.classList.add("tab-editing");
+        const input = document.createElement("input");
+        input.type = "text";
+        input.className = "tab-title-input";
+        input.value = this.editingTabTitle;
+        input.addEventListener("click", (event) => {
+          event.stopPropagation();
+        });
+        input.addEventListener("dblclick", (event) => {
+          event.stopPropagation();
+        });
+        input.addEventListener("input", () => {
+          this.editingTabTitle = input.value;
+        });
+        input.addEventListener("keydown", (event) => {
+          if (event.key === "Enter") {
+            event.preventDefault();
+            this.commitTabRename(tab.id);
+          } else if (event.key === "Escape") {
+            event.preventDefault();
+            this.cancelTabRename();
+          }
+        });
+        input.addEventListener("blur", () => {
+          this.commitTabRename(tab.id);
+        });
+
+        requestAnimationFrame(() => {
+          input.focus();
+          input.select();
+        });
+
+        button.append(input);
+      } else {
+        title.addEventListener("dblclick", (event) => {
+          event.stopPropagation();
+          this.startTabRename(tab.id);
+        });
+        button.append(title);
+      }
+
       const close = document.createElement("button");
       close.type = "button";
       close.className = "tab-close";
@@ -322,18 +369,25 @@ export class ShibuiApp {
       });
 
       button.addEventListener("click", () => {
+        if (this.editingTabId !== null && this.editingTabId !== tab.id) {
+          this.commitTabRename(this.editingTabId);
+        }
+
         this.persistEditor();
         this.tabState = activateTab(this.tabState, tab.id);
+        this.editingTabId = null;
+        this.editingTabTitle = "";
         this.renderTabs();
         this.applyActiveTabToEditor();
       });
 
-      button.append(title, close);
+      button.append(close);
       this.tabsElement.appendChild(button);
     });
   }
 
   private newTab(): void {
+    this.cancelTabRename();
     this.persistEditor();
     this.tabState = addTab(this.tabState);
     this.renderTabs();
@@ -342,6 +396,7 @@ export class ShibuiApp {
   }
 
   private closeTabById(tabId: number): void {
+    this.cancelTabRename();
     this.persistEditor();
     this.tabState = closeTab(this.tabState, tabId);
     this.renderTabs();
@@ -354,6 +409,7 @@ export class ShibuiApp {
   }
 
   private switchTabByNumber(oneBasedIndex: number): boolean {
+    this.cancelTabRename();
     this.persistEditor();
     this.tabState = switchTabByShortcut(this.tabState, oneBasedIndex);
     this.renderTabs();
@@ -436,11 +492,54 @@ export class ShibuiApp {
   }
 
   private applyLanguage(language: LanguageOption): void {
+    this.cancelTabRename();
     this.persistEditor();
     this.tabState = updateTabLanguage(this.tabState, this.tabState.activeTabId, language.id);
     this.renderTabs();
     this.applyActiveTabToEditor();
     this.scheduleSnapshotSync();
+  }
+
+  private startTabRename(tabId: number): void {
+    const tab = this.tabState.tabs.find((entry) => entry.id === tabId);
+    if (tab === undefined) {
+      return;
+    }
+
+    this.editingTabId = tabId;
+    this.editingTabTitle = tab.title;
+    this.renderTabs();
+  }
+
+  private commitTabRename(tabId: number): void {
+    if (this.editingTabId !== tabId) {
+      return;
+    }
+
+    const tab = this.tabState.tabs.find((entry) => entry.id === tabId);
+    if (tab === undefined) {
+      this.cancelTabRename();
+      return;
+    }
+
+    const nextTitle = this.editingTabTitle.trim();
+    const normalizedTitle = nextTitle.length === 0 ? tab.title : nextTitle;
+
+    this.tabState = updateTabTitle(this.tabState, tabId, normalizedTitle);
+    this.editingTabId = null;
+    this.editingTabTitle = "";
+    this.renderTabs();
+    this.scheduleSnapshotSync();
+  }
+
+  private cancelTabRename(): void {
+    if (this.editingTabId === null) {
+      return;
+    }
+
+    this.editingTabId = null;
+    this.editingTabTitle = "";
+    this.renderTabs();
   }
 
   private async openPlaceholderConfig(): Promise<void> {
