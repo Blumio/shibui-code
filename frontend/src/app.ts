@@ -1,4 +1,4 @@
-import { defaultKeymap, history, historyKeymap } from "@codemirror/commands";
+import { defaultKeymap, history, historyKeymap, indentWithTab } from "@codemirror/commands";
 import { Compartment, EditorState } from "@codemirror/state";
 import type { Extension } from "@codemirror/state";
 import { codeFolding, foldGutter, foldKeymap } from "@codemirror/language";
@@ -176,6 +176,7 @@ export class ShibuiApp {
 
   private editorKeyBindings() {
     return [
+      indentWithTab,
       {
         key: "Mod-n",
         preventDefault: true,
