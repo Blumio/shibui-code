@@ -9,6 +9,10 @@ export interface Range {
   to: number;
 }
 
+export function hasNonWhitespaceContent(content: string): boolean {
+  return content.trim().length > 0;
+}
+
 export function trailingWhitespaceRanges(content: string): Range[] {
   const ranges: Range[] = [];
   const lines = content.split("\n");
@@ -49,6 +53,10 @@ export function longLineRanges(content: string, maxLength = 120): Range[] {
 }
 
 function syntaxErrorDiagnostics(view: EditorView): Diagnostic[] {
+  if (!hasNonWhitespaceContent(view.state.doc.toString())) {
+    return [];
+  }
+
   const diagnostics: Diagnostic[] = [];
 
   syntaxTree(view.state).iterate({

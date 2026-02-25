@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { diagnosticsExtension, longLineRanges, trailingWhitespaceRanges } from "../linting";
+import {
+  diagnosticsExtension,
+  hasNonWhitespaceContent,
+  longLineRanges,
+  trailingWhitespaceRanges,
+} from "../linting";
 
 describe("linting", () => {
   it("detects trailing whitespace ranges", () => {
@@ -17,5 +22,11 @@ describe("linting", () => {
 
   it("builds diagnostics extension", () => {
     expect(diagnosticsExtension()).toBeDefined();
+  });
+
+  it("detects whether content is non-whitespace", () => {
+    expect(hasNonWhitespaceContent("")).toBe(false);
+    expect(hasNonWhitespaceContent("   \n\t")).toBe(false);
+    expect(hasNonWhitespaceContent("x")).toBe(true);
   });
 });

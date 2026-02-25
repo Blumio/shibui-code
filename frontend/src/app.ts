@@ -12,8 +12,9 @@ import {
   languageOptions,
   type LanguageOption,
 } from "./language";
-import { openSearchModal } from "./modal";
+import { openSearchModal, openTextInputModal } from "./modal";
 import { clearSnapshot, syncSnapshot } from "./native";
+import { emptyPlaceholderExtension, normalizePlaceholderInput } from "./placeholder";
 import {
   activeTab,
   activateTab,
@@ -42,6 +43,8 @@ export class ShibuiApp {
 
   private readonly languageCompartment = new Compartment();
 
+  private readonly placeholderCompartment = new Compartment();
+
   private tabState: TabState = createInitialTabState();
 
   private editor: EditorView | null = null;
@@ -49,6 +52,8 @@ export class ShibuiApp {
   private applyingEditorUpdate = false;
 
   private currentTheme: ThemeSpec = defaultTheme;
+
+  private emptyPagePlaceholder = "";
 
   private modalOpen = false;
 
@@ -108,6 +113,7 @@ export class ShibuiApp {
       diagnosticsExtension(),
       this.themeCompartment.of(this.currentTheme.extension),
       this.languageCompartment.of(languageExtension(activeTab(this.tabState).language)),
+      this.placeholderCompartment.of(emptyPlaceholderExtension(this.emptyPagePlaceholder)),
       keymap.of([...this.editorKeyBindings(), ...historyKeymap, ...defaultKeymap]),
       EditorView.updateListener.of((update) => {
         if (!update.docChanged || this.applyingEditorUpdate) {
@@ -169,6 +175,14 @@ export class ShibuiApp {
         preventDefault: true,
         run: () => {
           void this.openLanguageSearch();
+          return true;
+        },
+      },
+      {
+        key: "Mod-p",
+        preventDefault: true,
+        run: () => {
+          void this.openPlaceholderConfig();
           return true;
         },
       },
@@ -237,6 +251,12 @@ export class ShibuiApp {
     if (event.key.toLowerCase() === "l") {
       event.preventDefault();
       void this.openLanguageSearch();
+      return;
+    }
+
+    if (event.key.toLowerCase() === "p") {
+      event.preventDefault();
+      void this.openPlaceholderConfig();
       return;
     }
 
@@ -421,6 +441,39 @@ export class ShibuiApp {
     this.renderTabs();
     this.applyActiveTabToEditor();
     this.scheduleSnapshotSync();
+  }
+
+  private async openPlaceholderConfig(): Promise<void> {
+    if (this.modalOpen) {
+      return;
+    }
+
+    this.modalOpen = true;
+    const placeholder = await openTextInputModal({
+      title: "Configure Empty Page Placeholder",
+      placeholder: "Type your placeholder for an empty page.",
+      initialValue: this.emptyPagePlaceholder,
+    });
+    this.modalOpen = false;
+
+    if (placeholder === null) {
+      return;
+    }
+
+    this.applyEmptyPlaceholder(placeholder);
+  }
+
+  private applyEmptyPlaceholder(value: string): void {
+    if (this.editor === null) {
+      return;
+    }
+
+    this.emptyPagePlaceholder = normalizePlaceholderInput(value);
+    this.editor.dispatch({
+      effects: this.placeholderCompartment.reconfigure(
+        emptyPlaceholderExtension(this.emptyPagePlaceholder),
+      ),
+    });
   }
 
   private scheduleSnapshotSync(): void {

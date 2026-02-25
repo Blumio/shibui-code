@@ -7,6 +7,12 @@ export interface SearchModalOptions {
   items: ListItem[];
 }
 
+export interface TextInputModalOptions {
+  title: string;
+  placeholder: string;
+  initialValue?: string;
+}
+
 function createElement<K extends keyof HTMLElementTagNameMap>(
   tag: K,
   className: string,
@@ -101,5 +107,49 @@ export async function openSearchModal(options: SearchModalOptions): Promise<stri
 
     updateItems();
     input.focus();
+  });
+}
+
+export async function openTextInputModal(options: TextInputModalOptions): Promise<string | null> {
+  return new Promise<string | null>((resolve) => {
+    const overlay = createElement("div", "modal-overlay");
+    const modal = createElement("div", "modal-window");
+    modal.classList.add("modal-window-compact");
+    const title = createElement("div", "modal-title");
+    const input = createElement("input", "modal-input");
+    const hint = createElement("div", "modal-item modal-item-empty");
+
+    title.textContent = options.title;
+    input.type = "text";
+    input.placeholder = options.placeholder;
+    input.value = options.initialValue ?? "";
+    hint.textContent = "Press Enter to apply, Escape to cancel";
+
+    const cleanup = (value: string | null) => {
+      overlay.remove();
+      resolve(value);
+    };
+
+    input.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        cleanup(input.value);
+      } else if (event.key === "Escape") {
+        event.preventDefault();
+        cleanup(null);
+      }
+    });
+
+    overlay.addEventListener("click", (event) => {
+      if (event.target === overlay) {
+        cleanup(null);
+      }
+    });
+
+    modal.append(title, input, hint);
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+    input.focus();
+    input.setSelectionRange(input.value.length, input.value.length);
   });
 }
