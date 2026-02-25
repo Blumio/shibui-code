@@ -78,7 +78,9 @@ export class ShibuiApp {
 
   private emptyPagePlaceholder = "";
 
-  private analysisEnabled = true;
+  private highlightingEnabled = true;
+
+  private diagnosticsEnabled = true;
 
   private editingTabId: number | null = null;
 
@@ -166,9 +168,9 @@ export class ShibuiApp {
       codeFolding(),
       this.themeCompartment.of(this.currentTheme.extension),
       this.languageCompartment.of(
-        languageExtensionForMode(activeTab(this.tabState).language, this.analysisEnabled),
+        languageExtensionForMode(activeTab(this.tabState).language, this.highlightingEnabled),
       ),
-      this.diagnosticsCompartment.of(diagnosticsExtensionForMode(this.analysisEnabled)),
+      this.diagnosticsCompartment.of(diagnosticsExtensionForMode(this.diagnosticsEnabled)),
       this.placeholderCompartment.of(emptyPlaceholderExtension(this.emptyPagePlaceholder)),
       keymap.of([...this.editorKeyBindings(), ...foldKeymap, ...historyKeymap, ...defaultKeymap]),
       EditorView.updateListener.of((update) => {
@@ -268,9 +270,14 @@ export class ShibuiApp {
         },
       },
       {
-        key: "Mod-z",
+        key: "Mod-Shift-y",
         preventDefault: true,
-        run: () => this.toggleAnalysisFeatures(),
+        run: () => this.toggleHighlighting(),
+      },
+      {
+        key: "Mod-Shift-u",
+        preventDefault: true,
+        run: () => this.toggleDiagnostics(),
       },
       {
         key: "Mod-1",
@@ -385,9 +392,15 @@ export class ShibuiApp {
       return;
     }
 
-    if (event.key.toLowerCase() === "z") {
+    if (event.shiftKey && event.key.toLowerCase() === "y") {
       event.preventDefault();
-      this.toggleAnalysisFeatures();
+      this.toggleHighlighting();
+      return;
+    }
+
+    if (event.shiftKey && event.key.toLowerCase() === "u") {
+      event.preventDefault();
+      this.toggleDiagnostics();
       return;
     }
 
@@ -434,7 +447,7 @@ export class ShibuiApp {
       },
       effects: [
         this.languageCompartment.reconfigure(
-          languageExtensionForMode(currentTab.language, this.analysisEnabled),
+          languageExtensionForMode(currentTab.language, this.highlightingEnabled),
         ),
       ],
     });
@@ -789,7 +802,8 @@ export class ShibuiApp {
         description: "Import session-only syntax highlighting CSS.",
       },
       { shortcut: "Cmd/Ctrl+Shift+K", description: "Import session-only lint CSS." },
-      { shortcut: "Cmd/Ctrl+Z", description: "Toggle diagnostics and syntax highlighting." },
+      { shortcut: "Cmd/Ctrl+Shift+Y", description: "Toggle syntax highlighting." },
+      { shortcut: "Cmd/Ctrl+Shift+U", description: "Toggle lint diagnostics." },
       { shortcut: "Cmd/Ctrl+1..9", description: "Switch to tab by index." },
       { shortcut: "Cmd/Ctrl+Left/Right", description: "Switch to previous/next tab." },
       { shortcut: "Escape", description: "Close open modal dialogs." },
@@ -813,20 +827,31 @@ export class ShibuiApp {
     void this.sendSnapshot();
   }
 
-  private toggleAnalysisFeatures(): boolean {
+  private toggleHighlighting(): boolean {
     if (this.editor === null) {
       return false;
     }
 
-    this.analysisEnabled = !this.analysisEnabled;
+    this.highlightingEnabled = !this.highlightingEnabled;
     const currentTab = activeTab(this.tabState);
     this.editor.dispatch({
-      effects: [
-        this.languageCompartment.reconfigure(
-          languageExtensionForMode(currentTab.language, this.analysisEnabled),
-        ),
-        this.diagnosticsCompartment.reconfigure(diagnosticsExtensionForMode(this.analysisEnabled)),
-      ],
+      effects: this.languageCompartment.reconfigure(
+        languageExtensionForMode(currentTab.language, this.highlightingEnabled),
+      ),
+    });
+    return true;
+  }
+
+  private toggleDiagnostics(): boolean {
+    if (this.editor === null) {
+      return false;
+    }
+
+    this.diagnosticsEnabled = !this.diagnosticsEnabled;
+    this.editor.dispatch({
+      effects: this.diagnosticsCompartment.reconfigure(
+        diagnosticsExtensionForMode(this.diagnosticsEnabled),
+      ),
     });
     return true;
   }
