@@ -13,6 +13,12 @@ export interface TextInputModalOptions {
   initialValue?: string;
 }
 
+export interface MultilineInputModalOptions {
+  title: string;
+  placeholder: string;
+  initialValue?: string;
+}
+
 export interface HelpShortcutItem {
   shortcut: string;
   description: string;
@@ -147,6 +153,54 @@ export async function openTextInputModal(options: TextInputModalOptions): Promis
       } else if (event.key === "Escape") {
         event.preventDefault();
         cleanup(null);
+      }
+    });
+
+    overlay.addEventListener("click", (event) => {
+      if (event.target === overlay) {
+        cleanup(null);
+      }
+    });
+
+    modal.append(title, input, hint);
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+    input.focus();
+    input.setSelectionRange(input.value.length, input.value.length);
+  });
+}
+
+export async function openMultilineInputModal(
+  options: MultilineInputModalOptions,
+): Promise<string | null> {
+  return new Promise<string | null>((resolve) => {
+    const overlay = createElement("div", "modal-overlay");
+    const modal = createElement("div", "modal-window");
+    modal.classList.add("modal-window-compact");
+    const title = createElement("div", "modal-title");
+    const input = createElement("textarea", "modal-textarea");
+    const hint = createElement("div", "modal-item modal-item-empty");
+
+    title.textContent = options.title;
+    input.placeholder = options.placeholder;
+    input.value = options.initialValue ?? "";
+    hint.textContent = "Press Cmd/Ctrl+Enter to apply, Escape to cancel";
+
+    const cleanup = (value: string | null) => {
+      overlay.remove();
+      resolve(value);
+    };
+
+    input.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        cleanup(null);
+        return;
+      }
+
+      if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
+        event.preventDefault();
+        cleanup(input.value);
       }
     });
 

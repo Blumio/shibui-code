@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { openHelpModal, openTextInputModal } from "../modal";
+import { openHelpModal, openMultilineInputModal, openTextInputModal } from "../modal";
 
 describe("modal", () => {
   it("resolves with text on enter", async () => {
@@ -44,5 +44,20 @@ describe("modal", () => {
     expect(rows.length).toBe(2);
     window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
     await expect(promise).resolves.toBeUndefined();
+  });
+
+  it("resolves multiline modal on Cmd/Ctrl+Enter", async () => {
+    const promise = openMultilineInputModal({
+      title: "Import Highlight Style",
+      placeholder: "Paste CSS...",
+      initialValue: ".cm-content { color: red; }",
+    });
+
+    const textarea = document.querySelector(".modal-textarea") as HTMLTextAreaElement;
+    expect(textarea).not.toBeNull();
+    textarea.value = ".cm-content { color: #fff; }";
+    textarea.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", ctrlKey: true }));
+
+    await expect(promise).resolves.toBe(".cm-content { color: #fff; }");
   });
 });

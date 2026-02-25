@@ -287,6 +287,27 @@ body,
   border-color: #5f8bb6;
 }
 
+.modal-textarea {
+  margin: 10px 12px;
+  min-height: 180px;
+  max-height: 46vh;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #314155;
+  background: #0f141b;
+  color: #dce7f5;
+  outline: none;
+  resize: vertical;
+  font-family: "Iosevka", "JetBrains Mono", "Fira Code", monospace;
+  font-size: 12px;
+  line-height: 1.5;
+  white-space: pre;
+}
+
+.modal-textarea:focus {
+  border-color: #5f8bb6;
+}
+
 .modal-list {
   overflow: auto;
   padding: 8px;

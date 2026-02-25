@@ -18,9 +18,15 @@ import {
   languageOptions,
   type LanguageOption,
 } from "./language";
-import { openHelpModal, openSearchModal, openTextInputModal } from "./modal";
+import {
+  openHelpModal,
+  openMultilineInputModal,
+  openSearchModal,
+  openTextInputModal,
+} from "./modal";
 import { clearSnapshot, resizeWindow, syncSnapshot } from "./native";
 import { emptyPlaceholderExtension, normalizePlaceholderInput } from "./placeholder";
+import { applySessionCss } from "./session-styles";
 import {
   activeTab,
   activateTab,
@@ -226,6 +232,22 @@ export class ShibuiApp {
         },
       },
       {
+        key: "Mod-Shift-j",
+        preventDefault: true,
+        run: () => {
+          void this.openHighlightStyleImport();
+          return true;
+        },
+      },
+      {
+        key: "Mod-Shift-k",
+        preventDefault: true,
+        run: () => {
+          void this.openLintStyleImport();
+          return true;
+        },
+      },
+      {
         key: "Mod-z",
         preventDefault: true,
         run: () => this.toggleAnalysisFeatures(),
@@ -328,6 +350,18 @@ export class ShibuiApp {
     if (event.key.toLowerCase() === "h") {
       event.preventDefault();
       void this.openHelpWindow();
+      return;
+    }
+
+    if (event.shiftKey && event.key.toLowerCase() === "j") {
+      event.preventDefault();
+      void this.openHighlightStyleImport();
+      return;
+    }
+
+    if (event.shiftKey && event.key.toLowerCase() === "k") {
+      event.preventDefault();
+      void this.openLintStyleImport();
       return;
     }
 
@@ -701,6 +735,11 @@ export class ShibuiApp {
       { shortcut: "Cmd/Ctrl+L", description: "Open language selection." },
       { shortcut: "Cmd/Ctrl+P", description: "Configure empty-page placeholder text." },
       { shortcut: "Cmd/Ctrl+H", description: "Show this help window." },
+      {
+        shortcut: "Cmd/Ctrl+Shift+J",
+        description: "Import session-only syntax highlighting CSS.",
+      },
+      { shortcut: "Cmd/Ctrl+Shift+K", description: "Import session-only lint CSS." },
       { shortcut: "Cmd/Ctrl+Z", description: "Toggle diagnostics and syntax highlighting." },
       { shortcut: "Cmd/Ctrl+1..9", description: "Switch to tab by index." },
       { shortcut: "Cmd/Ctrl+Left/Right", description: "Switch to previous/next tab." },
@@ -741,6 +780,46 @@ export class ShibuiApp {
       ],
     });
     return true;
+  }
+
+  private async openHighlightStyleImport(): Promise<void> {
+    if (this.modalOpen) {
+      return;
+    }
+
+    this.modalOpen = true;
+    const css = await openMultilineInputModal({
+      title: "Import Highlight Style (Session)",
+      placeholder:
+        "Type or paste CSS targeting CodeMirror token selectors. Example:\n.cm-keyword { color: #ff8c6a; }",
+    });
+    this.modalOpen = false;
+
+    if (css === null) {
+      return;
+    }
+
+    applySessionCss("highlight", css);
+  }
+
+  private async openLintStyleImport(): Promise<void> {
+    if (this.modalOpen) {
+      return;
+    }
+
+    this.modalOpen = true;
+    const css = await openMultilineInputModal({
+      title: "Import Lint Style (Session)",
+      placeholder:
+        "Type or paste CSS for lint visuals. Example:\n.cm-lintRange-error { text-decoration: underline 2px solid #ff3b30; }",
+    });
+    this.modalOpen = false;
+
+    if (css === null) {
+      return;
+    }
+
+    applySessionCss("lint", css);
   }
 
   private async sendSnapshot(): Promise<void> {
