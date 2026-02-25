@@ -1,0 +1,22 @@
+# Build outputs
+build/
+.native-build/
+cmake-build-*/
+dist/
+artifacts/
+
+# Node
+node_modules/
+frontend/node_modules/
+coverage/
+
+# Python
+.pytest_cache/
+__pycache__/
+*.pyc
+
+# macOS
+.DS_Store
+
+# Generated frontend bundle header
+src/frontend_bundle.hpp

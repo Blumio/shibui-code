@@ -1,0 +1,105 @@
+import { fuzzyFilter } from "./fuzzy";
+import type { ListItem } from "./types";
+
+export interface SearchModalOptions {
+  title: string;
+  placeholder: string;
+  items: ListItem[];
+}
+
+function createElement<K extends keyof HTMLElementTagNameMap>(
+  tag: K,
+  className: string,
+): HTMLElementTagNameMap[K] {
+  const element = document.createElement(tag);
+  element.className = className;
+  return element;
+}
+
+export async function openSearchModal(options: SearchModalOptions): Promise<string | null> {
+  return new Promise<string | null>((resolve) => {
+    const overlay = createElement("div", "modal-overlay");
+    const modal = createElement("div", "modal-window");
+    const title = createElement("div", "modal-title");
+    const input = createElement("input", "modal-input");
+    const list = createElement("div", "modal-list");
+
+    title.textContent = options.title;
+    input.type = "text";
+    input.placeholder = options.placeholder;
+
+    let selectedIndex = 0;
+    let visibleItems = [...options.items];
+
+    const cleanup = (value: string | null) => {
+      overlay.remove();
+      resolve(value);
+    };
+
+    const render = () => {
+      list.replaceChildren();
+      if (visibleItems.length === 0) {
+        const empty = createElement("div", "modal-item modal-item-empty");
+        empty.textContent = "No matches";
+        list.appendChild(empty);
+        return;
+      }
+
+      visibleItems.forEach((item, index) => {
+        const option = createElement("div", "modal-item");
+        if (index === selectedIndex) {
+          option.classList.add("modal-item-selected");
+        }
+        option.setAttribute("role", "button");
+        option.setAttribute("tabindex", "0");
+        option.textContent = item.label;
+        option.addEventListener("click", () => cleanup(item.id));
+        option.addEventListener("keydown", (event) => {
+          if (event.key === "Enter") {
+            cleanup(item.id);
+          }
+        });
+        list.appendChild(option);
+      });
+    };
+
+    const updateItems = () => {
+      visibleItems = fuzzyFilter(options.items, input.value.trim());
+      selectedIndex = Math.min(selectedIndex, Math.max(0, visibleItems.length - 1));
+      render();
+    };
+
+    input.addEventListener("input", updateItems);
+    input.addEventListener("keydown", (event) => {
+      if (event.key === "ArrowDown") {
+        event.preventDefault();
+        selectedIndex = Math.min(selectedIndex + 1, Math.max(0, visibleItems.length - 1));
+        render();
+      } else if (event.key === "ArrowUp") {
+        event.preventDefault();
+        selectedIndex = Math.max(selectedIndex - 1, 0);
+        render();
+      } else if (event.key === "Enter") {
+        event.preventDefault();
+        const selected = visibleItems[selectedIndex];
+        cleanup(selected === undefined ? null : selected.id);
+      } else if (event.key === "Escape") {
+        event.preventDefault();
+        cleanup(null);
+      }
+    });
+
+    overlay.addEventListener("click", (event) => {
+      if (event.target === overlay) {
+        cleanup(null);
+      }
+    });
+
+    modal.append(title, input, list);
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+
+    updateItems();
+    input.focus();
+  });
+}

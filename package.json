@@ -1,0 +1,44 @@
+{
+  "name": "shibui-code",
+  "version": "1.0.0",
+  "description": "Distraction-free code scribbling desktop editor built with C++, GTK and CodeMirror 6.",
+  "type": "module",
+  "license": "MIT",
+  "bin": {
+    "shibui-code": "cli/shibui-code.js"
+  },
+  "scripts": {
+    "postinstall": "node cli/scripts/postinstall.js",
+    "build:frontend": "npm --prefix frontend run build && node scripts/embed-frontend.mjs",
+    "build:native": "node cli/scripts/build-native.js",
+    "build": "npm run build:frontend && npm run build:native",
+    "test:frontend": "npm --prefix frontend run test",
+    "test:native": "node cli/scripts/build-native.js --with-tests && ctest --test-dir .native-build --output-on-failure",
+    "test:python": "pytest -q",
+    "test": "npm run test:frontend && npm run test:native && npm run test:python",
+    "package:linux": "bash scripts/package-linux.sh",
+    "package:macos": "bash scripts/package-macos.sh",
+    "package:windows": "powershell -ExecutionPolicy Bypass -File scripts/package-windows.ps1"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "files": [
+    "CMakeLists.txt",
+    "cmake",
+    "cli",
+    "docs",
+    "frontend",
+    "scripts",
+    "src",
+    "tests",
+    "README.md"
+  ],
+  "keywords": [
+    "desktop",
+    "editor",
+    "codemirror",
+    "gtk",
+    "cpp"
+  ]
+}

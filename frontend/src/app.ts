@@ -1,0 +1,459 @@
+import { defaultKeymap, history, historyKeymap } from "@codemirror/commands";
+import { Compartment, EditorState } from "@codemirror/state";
+import type { Extension } from "@codemirror/state";
+import { EditorView, highlightActiveLineGutter, keymap, lineNumbers } from "@codemirror/view";
+
+import { fuzzyFilter } from "./fuzzy";
+import { isPrimaryModifier, shortcutDigit } from "./keybindings";
+import { diagnosticsExtension } from "./linting";
+import {
+  languageExtension,
+  languageLabel,
+  languageOptions,
+  type LanguageOption,
+} from "./language";
+import { openSearchModal } from "./modal";
+import { clearSnapshot, syncSnapshot } from "./native";
+import {
+  activeTab,
+  activateTab,
+  addTab,
+  clearTabs,
+  closeTab,
+  createInitialTabState,
+  serializeSnapshot,
+  switchTabByShortcut,
+  type TabState,
+  updateTabContent,
+  updateTabLanguage,
+} from "./tabs";
+import { findThemeLoader, themeListItems } from "./theme-registry";
+import defaultTheme from "./themes/vscode-dark-plus";
+import type { ListItem, ThemeSpec } from "./types";
+
+export class ShibuiApp {
+  private readonly root: HTMLElement;
+
+  private readonly tabsElement: HTMLDivElement;
+
+  private readonly editorElement: HTMLDivElement;
+
+  private readonly themeCompartment = new Compartment();
+
+  private readonly languageCompartment = new Compartment();
+
+  private tabState: TabState = createInitialTabState();
+
+  private editor: EditorView | null = null;
+
+  private applyingEditorUpdate = false;
+
+  private currentTheme: ThemeSpec = defaultTheme;
+
+  private modalOpen = false;
+
+  constructor(root: HTMLElement) {
+    this.root = root;
+
+    const shell = document.createElement("div");
+    shell.className = "app-shell";
+
+    const tabBar = document.createElement("div");
+    tabBar.className = "tabbar";
+
+    this.tabsElement = document.createElement("div");
+    this.tabsElement.className = "tabs";
+
+    const newTabButton = document.createElement("button");
+    newTabButton.type = "button";
+    newTabButton.className = "tab-new";
+    newTabButton.textContent = "+";
+    newTabButton.title = "New tab (Ctrl+N)";
+    newTabButton.addEventListener("click", () => {
+      this.newTab();
+    });
+
+    tabBar.append(this.tabsElement, newTabButton);
+
+    this.editorElement = document.createElement("div");
+    this.editorElement.className = "editor-root";
+
+    shell.append(tabBar, this.editorElement);
+    this.root.appendChild(shell);
+  }
+
+  async initialize(): Promise<void> {
+    this.root.classList.add(this.currentTheme.editorClassName);
+    this.renderTabs();
+    this.createEditor();
+
+    window.addEventListener("keydown", (event) => {
+      this.handleGlobalShortcuts(event);
+    });
+
+    window.addEventListener("beforeunload", () => {
+      this.flushSnapshot();
+      this.tabState = clearTabs();
+    });
+
+    await clearSnapshot();
+    this.flushSnapshot();
+  }
+
+  private buildBaseExtensions(): Extension[] {
+    return [
+      lineNumbers(),
+      highlightActiveLineGutter(),
+      history(),
+      diagnosticsExtension(),
+      this.themeCompartment.of(this.currentTheme.extension),
+      this.languageCompartment.of(languageExtension(activeTab(this.tabState).language)),
+      keymap.of([...this.editorKeyBindings(), ...historyKeymap, ...defaultKeymap]),
+      EditorView.updateListener.of((update) => {
+        if (!update.docChanged || this.applyingEditorUpdate) {
+          return;
+        }
+
+        this.tabState = updateTabContent(
+          this.tabState,
+          this.tabState.activeTabId,
+          update.state.doc.toString(),
+        );
+        this.scheduleSnapshotSync();
+      }),
+    ];
+  }
+
+  private createEditor(): void {
+    const currentTab = activeTab(this.tabState);
+
+    const state = EditorState.create({
+      doc: currentTab.content,
+      extensions: this.buildBaseExtensions(),
+    });
+
+    this.editor = new EditorView({
+      parent: this.editorElement,
+      state,
+    });
+  }
+
+  private editorKeyBindings() {
+    return [
+      {
+        key: "Mod-n",
+        preventDefault: true,
+        run: () => {
+          this.newTab();
+          return true;
+        },
+      },
+      {
+        key: "Mod-w",
+        preventDefault: true,
+        run: () => {
+          this.closeActiveTab();
+          return true;
+        },
+      },
+      {
+        key: "Mod-s",
+        preventDefault: true,
+        run: () => {
+          void this.openThemeSearch();
+          return true;
+        },
+      },
+      {
+        key: "Mod-l",
+        preventDefault: true,
+        run: () => {
+          void this.openLanguageSearch();
+          return true;
+        },
+      },
+      {
+        key: "Mod-1",
+        run: () => this.switchTabByNumber(1),
+      },
+      {
+        key: "Mod-2",
+        run: () => this.switchTabByNumber(2),
+      },
+      {
+        key: "Mod-3",
+        run: () => this.switchTabByNumber(3),
+      },
+      {
+        key: "Mod-4",
+        run: () => this.switchTabByNumber(4),
+      },
+      {
+        key: "Mod-5",
+        run: () => this.switchTabByNumber(5),
+      },
+      {
+        key: "Mod-6",
+        run: () => this.switchTabByNumber(6),
+      },
+      {
+        key: "Mod-7",
+        run: () => this.switchTabByNumber(7),
+      },
+      {
+        key: "Mod-8",
+        run: () => this.switchTabByNumber(8),
+      },
+      {
+        key: "Mod-9",
+        run: () => this.switchTabByNumber(9),
+      },
+    ];
+  }
+
+  private handleGlobalShortcuts(event: KeyboardEvent): void {
+    if (!isPrimaryModifier(event)) {
+      return;
+    }
+
+    if (event.key.toLowerCase() === "s") {
+      event.preventDefault();
+      void this.openThemeSearch();
+      return;
+    }
+
+    if (event.key.toLowerCase() === "n") {
+      event.preventDefault();
+      this.newTab();
+      return;
+    }
+
+    if (event.key.toLowerCase() === "w") {
+      event.preventDefault();
+      this.closeActiveTab();
+      return;
+    }
+
+    if (event.key.toLowerCase() === "l") {
+      event.preventDefault();
+      void this.openLanguageSearch();
+      return;
+    }
+
+    const digit = shortcutDigit(event);
+    if (digit !== null) {
+      event.preventDefault();
+      this.switchTabByNumber(digit);
+    }
+  }
+
+  private persistEditor(): void {
+    if (this.editor === null) {
+      return;
+    }
+
+    this.tabState = updateTabContent(this.tabState, this.tabState.activeTabId, this.editor.state.doc.toString());
+  }
+
+  private applyActiveTabToEditor(): void {
+    if (this.editor === null) {
+      return;
+    }
+
+    const currentTab = activeTab(this.tabState);
+
+    this.applyingEditorUpdate = true;
+    this.editor.dispatch({
+      changes: {
+        from: 0,
+        to: this.editor.state.doc.length,
+        insert: currentTab.content,
+      },
+      effects: [this.languageCompartment.reconfigure(languageExtension(currentTab.language))],
+    });
+    this.applyingEditorUpdate = false;
+
+    this.editor.focus();
+  }
+
+  private renderTabs(): void {
+    this.tabsElement.replaceChildren();
+
+    this.tabState.tabs.forEach((tab) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "tab";
+      if (tab.id === this.tabState.activeTabId) {
+        button.classList.add("tab-active");
+      }
+
+      const title = document.createElement("span");
+      title.className = "tab-title";
+      title.textContent = tab.title;
+
+      const close = document.createElement("button");
+      close.type = "button";
+      close.className = "tab-close";
+      close.textContent = "x";
+      close.title = "Close tab";
+      close.addEventListener("click", (event) => {
+        event.stopPropagation();
+        this.closeTabById(tab.id);
+      });
+
+      button.addEventListener("click", () => {
+        this.persistEditor();
+        this.tabState = activateTab(this.tabState, tab.id);
+        this.renderTabs();
+        this.applyActiveTabToEditor();
+      });
+
+      button.append(title, close);
+      this.tabsElement.appendChild(button);
+    });
+  }
+
+  private newTab(): void {
+    this.persistEditor();
+    this.tabState = addTab(this.tabState);
+    this.renderTabs();
+    this.applyActiveTabToEditor();
+    this.scheduleSnapshotSync();
+  }
+
+  private closeTabById(tabId: number): void {
+    this.persistEditor();
+    this.tabState = closeTab(this.tabState, tabId);
+    this.renderTabs();
+    this.applyActiveTabToEditor();
+    this.scheduleSnapshotSync();
+  }
+
+  private closeActiveTab(): void {
+    this.closeTabById(this.tabState.activeTabId);
+  }
+
+  private switchTabByNumber(oneBasedIndex: number): boolean {
+    this.persistEditor();
+    this.tabState = switchTabByShortcut(this.tabState, oneBasedIndex);
+    this.renderTabs();
+    this.applyActiveTabToEditor();
+    this.scheduleSnapshotSync();
+    return true;
+  }
+
+  private async openThemeSearch(): Promise<void> {
+    if (this.modalOpen) {
+      return;
+    }
+
+    this.modalOpen = true;
+    const selectedId = await openSearchModal({
+      title: "Theme Search Mode",
+      placeholder: "Search theme",
+      items: themeListItems(),
+    });
+    this.modalOpen = false;
+
+    if (selectedId === null) {
+      return;
+    }
+
+    const loader = findThemeLoader(selectedId);
+    if (loader === undefined) {
+      return;
+    }
+
+    const nextTheme = await loader.load();
+    await this.applyTheme(nextTheme);
+  }
+
+  private async applyTheme(nextTheme: ThemeSpec): Promise<void> {
+    if (this.editor === null) {
+      return;
+    }
+
+    this.root.classList.remove(this.currentTheme.editorClassName);
+    this.root.classList.add(nextTheme.editorClassName);
+    this.currentTheme = nextTheme;
+
+    this.editor.dispatch({
+      effects: this.themeCompartment.reconfigure(nextTheme.extension),
+    });
+  }
+
+  private languageListItems(): ListItem[] {
+    return languageOptions().map((option) => ({
+      id: option.id,
+      label: option.label,
+      searchText: `${option.id} ${option.label}`,
+    }));
+  }
+
+  private async openLanguageSearch(): Promise<void> {
+    if (this.modalOpen) {
+      return;
+    }
+
+    this.modalOpen = true;
+    const selectedId = await openSearchModal({
+      title: "Select Language",
+      placeholder: "Search language",
+      items: this.languageListItems(),
+    });
+    this.modalOpen = false;
+
+    if (selectedId === null) {
+      return;
+    }
+
+    const selected = languageOptions().find((entry) => entry.id === selectedId);
+    if (selected === undefined) {
+      return;
+    }
+
+    this.applyLanguage(selected);
+  }
+
+  private applyLanguage(language: LanguageOption): void {
+    this.persistEditor();
+    this.tabState = updateTabLanguage(this.tabState, this.tabState.activeTabId, language.id);
+    this.renderTabs();
+    this.applyActiveTabToEditor();
+    this.scheduleSnapshotSync();
+  }
+
+  private scheduleSnapshotSync(): void {
+    void this.sendSnapshot();
+  }
+
+  private async sendSnapshot(): Promise<void> {
+    this.persistEditor();
+    const payload = serializeSnapshot(this.tabState);
+    await syncSnapshot(payload);
+  }
+
+  private flushSnapshot(): void {
+    this.persistEditor();
+    void syncSnapshot(serializeSnapshot(this.tabState));
+  }
+}
+
+export function bootstrap(root: HTMLElement): Promise<void> {
+  const app = new ShibuiApp(root);
+  return app.initialize();
+}
+
+export function filterLanguageItems(options: LanguageOption[], query: string): ListItem[] {
+  const items = options.map((option) => ({
+    id: option.id,
+    label: option.label,
+    searchText: `${option.id} ${option.label}`,
+  }));
+
+  return fuzzyFilter(items, query);
+}
+
+export function languageTitle(languageId: LanguageOption["id"]): string {
+  return languageLabel(languageId);
+}

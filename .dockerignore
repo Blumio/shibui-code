@@ -1,0 +1,8 @@
+.git
+.pytest_cache
+build
+.native-build
+dist
+frontend/node_modules
+node_modules
+.npmrc
