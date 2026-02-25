@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import { filterLanguageItems, languageTitle, tabStripScrollDelta } from "../app";
+import {
+  diagnosticsExtensionForMode,
+  filterLanguageItems,
+  languageExtensionForMode,
+  languageTitle,
+  tabStripScrollDelta,
+} from "../app";
 import { languageOptions } from "../language";
 
 describe("app utility functions", () => {
@@ -19,5 +25,13 @@ describe("app utility functions", () => {
 
   it("uses vertical wheel delta when horizontal delta is absent", () => {
     expect(tabStripScrollDelta({ deltaX: 0, deltaY: -90 })).toBe(-90);
+  });
+
+  it("returns no language extension when analysis mode is disabled", () => {
+    expect(languageExtensionForMode("python", false)).toEqual([]);
+  });
+
+  it("returns no diagnostics extension when analysis mode is disabled", () => {
+    expect(diagnosticsExtensionForMode(false)).toEqual([]);
   });
 });

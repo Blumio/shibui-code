@@ -52,6 +52,8 @@ export class ShibuiApp {
 
   private readonly languageCompartment = new Compartment();
 
+  private readonly diagnosticsCompartment = new Compartment();
+
   private readonly placeholderCompartment = new Compartment();
 
   private tabState: TabState = createInitialTabState();
@@ -63,6 +65,8 @@ export class ShibuiApp {
   private currentTheme: ThemeSpec = defaultTheme;
 
   private emptyPagePlaceholder = "";
+
+  private analysisEnabled = true;
 
   private editingTabId: number | null = null;
 
@@ -134,9 +138,11 @@ export class ShibuiApp {
       highlightActiveLineGutter(),
       history(),
       codeFolding(),
-      diagnosticsExtension(),
       this.themeCompartment.of(this.currentTheme.extension),
-      this.languageCompartment.of(languageExtension(activeTab(this.tabState).language)),
+      this.languageCompartment.of(
+        languageExtensionForMode(activeTab(this.tabState).language, this.analysisEnabled),
+      ),
+      this.diagnosticsCompartment.of(diagnosticsExtensionForMode(this.analysisEnabled)),
       this.placeholderCompartment.of(emptyPlaceholderExtension(this.emptyPagePlaceholder)),
       keymap.of([...this.editorKeyBindings(), ...foldKeymap, ...historyKeymap, ...defaultKeymap]),
       EditorView.updateListener.of((update) => {
@@ -217,6 +223,11 @@ export class ShibuiApp {
           void this.openHelpWindow();
           return true;
         },
+      },
+      {
+        key: "Mod-z",
+        preventDefault: true,
+        run: () => this.toggleAnalysisFeatures(),
       },
       {
         key: "Mod-1",
@@ -319,6 +330,12 @@ export class ShibuiApp {
       return;
     }
 
+    if (event.key.toLowerCase() === "z") {
+      event.preventDefault();
+      this.toggleAnalysisFeatures();
+      return;
+    }
+
     if (event.key === "ArrowLeft") {
       event.preventDefault();
       this.switchToPreviousTab();
@@ -360,7 +377,11 @@ export class ShibuiApp {
         to: this.editor.state.doc.length,
         insert: currentTab.content,
       },
-      effects: [this.languageCompartment.reconfigure(languageExtension(currentTab.language))],
+      effects: [
+        this.languageCompartment.reconfigure(
+          languageExtensionForMode(currentTab.language, this.analysisEnabled),
+        ),
+      ],
     });
     this.applyingEditorUpdate = false;
 
@@ -679,7 +700,9 @@ export class ShibuiApp {
       { shortcut: "Cmd/Ctrl+L", description: "Open language selection." },
       { shortcut: "Cmd/Ctrl+P", description: "Configure empty-page placeholder text." },
       { shortcut: "Cmd/Ctrl+H", description: "Show this help window." },
+      { shortcut: "Cmd/Ctrl+Z", description: "Toggle diagnostics and syntax highlighting." },
       { shortcut: "Cmd/Ctrl+1..9", description: "Switch to tab by index." },
+      { shortcut: "Cmd/Ctrl+Left/Right", description: "Switch to previous/next tab." },
       { shortcut: "Escape", description: "Close open modal dialogs." },
     ];
   }
@@ -699,6 +722,24 @@ export class ShibuiApp {
 
   private scheduleSnapshotSync(): void {
     void this.sendSnapshot();
+  }
+
+  private toggleAnalysisFeatures(): boolean {
+    if (this.editor === null) {
+      return false;
+    }
+
+    this.analysisEnabled = !this.analysisEnabled;
+    const currentTab = activeTab(this.tabState);
+    this.editor.dispatch({
+      effects: [
+        this.languageCompartment.reconfigure(
+          languageExtensionForMode(currentTab.language, this.analysisEnabled),
+        ),
+        this.diagnosticsCompartment.reconfigure(diagnosticsExtensionForMode(this.analysisEnabled)),
+      ],
+    });
+    return true;
   }
 
   private async sendSnapshot(): Promise<void> {
@@ -730,6 +771,25 @@ export function filterLanguageItems(options: LanguageOption[], query: string): L
 
 export function languageTitle(languageId: LanguageOption["id"]): string {
   return languageLabel(languageId);
+}
+
+export function languageExtensionForMode(
+  languageId: LanguageOption["id"],
+  analysisEnabled: boolean,
+): Extension {
+  if (!analysisEnabled) {
+    return [];
+  }
+
+  return languageExtension(languageId);
+}
+
+export function diagnosticsExtensionForMode(analysisEnabled: boolean): Extension {
+  if (!analysisEnabled) {
+    return [];
+  }
+
+  return diagnosticsExtension();
 }
 
 export function tabStripScrollDelta(event: Pick<WheelEvent, "deltaX" | "deltaY">): number {
