@@ -24,12 +24,14 @@ set(SHIBUI_SOURCES
   src/main.cpp
   src/app.cpp
   src/snapshot.cpp
+  src/window_snap.cpp
 )
 
 if(WIN32)
   list(APPEND SHIBUI_SOURCES src/clipboard_win.cpp)
 elseif(APPLE)
   list(APPEND SHIBUI_SOURCES src/clipboard_mac.mm)
+  list(APPEND SHIBUI_SOURCES src/window_snap_mac.mm)
 else()
   find_package(PkgConfig REQUIRED)
   pkg_check_modules(GTK3 REQUIRED gtk+-3.0)
@@ -62,7 +64,9 @@ if(SHIBUI_BUILD_TESTS)
   enable_testing()
   add_executable(shibui-unit-tests
     tests/cpp/test_snapshot.cpp
+    tests/cpp/test_window_snap.cpp
     src/snapshot.cpp
+    src/window_snap.cpp
   )
   target_include_directories(shibui-unit-tests PRIVATE src)
   add_test(NAME shibui-unit-tests COMMAND shibui-unit-tests)

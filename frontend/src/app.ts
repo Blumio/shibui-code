@@ -56,6 +56,12 @@ export class ShibuiApp {
 
   private readonly tabsElement: HTMLDivElement;
 
+  private readonly tabControlsElement: HTMLDivElement;
+
+  private readonly tabScrollLeftButton: HTMLButtonElement;
+
+  private readonly tabScrollRightButton: HTMLButtonElement;
+
   private readonly tabBarToggleButton: HTMLButtonElement;
 
   private readonly editorElement: HTMLDivElement;
@@ -90,6 +96,8 @@ export class ShibuiApp {
 
   private tabBarCollapsed = false;
 
+  private toastTimerId: number | null = null;
+
   private readonly isMac = navigator.platform.toLowerCase().includes("mac");
 
   constructor(root: HTMLElement) {
@@ -100,16 +108,40 @@ export class ShibuiApp {
 
     this.tabBarElement = document.createElement("div");
     this.tabBarElement.className = "tabbar";
-
-    this.tabsElement = document.createElement("div");
-    this.tabsElement.className = "tabs";
-    this.tabsElement.addEventListener(
+    this.tabBarElement.addEventListener(
       "wheel",
       (event) => {
         this.handleTabStripWheel(event);
       },
       { passive: false },
     );
+
+    this.tabsElement = document.createElement("div");
+    this.tabsElement.className = "tabs";
+    this.tabsElement.addEventListener("scroll", () => {
+      this.updateTabOverflowState();
+    });
+
+    this.tabControlsElement = document.createElement("div");
+    this.tabControlsElement.className = "tabbar-controls";
+
+    this.tabScrollLeftButton = document.createElement("button");
+    this.tabScrollLeftButton.type = "button";
+    this.tabScrollLeftButton.className = "tab-scroll tab-scroll-left";
+    this.tabScrollLeftButton.textContent = "<";
+    this.tabScrollLeftButton.title = "Scroll tabs left";
+    this.tabScrollLeftButton.addEventListener("click", () => {
+      this.scrollTabsBy(-220);
+    });
+
+    this.tabScrollRightButton = document.createElement("button");
+    this.tabScrollRightButton.type = "button";
+    this.tabScrollRightButton.className = "tab-scroll tab-scroll-right";
+    this.tabScrollRightButton.textContent = ">";
+    this.tabScrollRightButton.title = "Scroll tabs right";
+    this.tabScrollRightButton.addEventListener("click", () => {
+      this.scrollTabsBy(220);
+    });
 
     const newTabButton = document.createElement("button");
     newTabButton.type = "button";
@@ -123,7 +155,8 @@ export class ShibuiApp {
     this.tabBarToggleButton = document.createElement("button");
     this.tabBarToggleButton.type = "button";
     this.tabBarToggleButton.className = "tabbar-toggle";
-    this.tabBarToggleButton.textContent = "^";
+    this.tabBarToggleButton.textContent = "";
+    this.tabBarToggleButton.dataset.icon = "^";
     this.tabBarToggleButton.title = "Hide tab bar";
     this.tabBarToggleButton.addEventListener("click", (event) => {
       event.preventDefault();
@@ -131,12 +164,13 @@ export class ShibuiApp {
       this.toggleTabBar();
     });
 
-    this.tabBarElement.append(this.tabsElement, newTabButton, this.tabBarToggleButton);
+    this.tabControlsElement.append(this.tabScrollLeftButton, this.tabScrollRightButton, newTabButton);
+    this.tabBarElement.append(this.tabsElement, this.tabControlsElement);
 
     this.editorElement = document.createElement("div");
     this.editorElement.className = "editor-root";
 
-    this.shellElement.append(this.tabBarElement, this.editorElement);
+    this.shellElement.append(this.tabBarElement, this.tabBarToggleButton, this.editorElement);
     this.root.appendChild(this.shellElement);
     this.updateTabBarVisibility();
   }
@@ -155,8 +189,13 @@ export class ShibuiApp {
       this.tabState = clearTabs();
     });
 
+    window.addEventListener("resize", () => {
+      this.updateTabOverflowState();
+    });
+
     await clearSnapshot();
     this.flushSnapshot();
+    this.updateTabOverflowState();
   }
 
   private buildBaseExtensions(): Extension[] {
@@ -460,11 +499,10 @@ export class ShibuiApp {
     this.tabsElement.replaceChildren();
 
     this.tabState.tabs.forEach((tab) => {
-      const button = document.createElement("button");
-      button.type = "button";
-      button.className = "tab";
+      const tabElement = document.createElement("div");
+      tabElement.className = "tab";
       if (tab.id === this.tabState.activeTabId) {
-        button.classList.add("tab-active");
+        tabElement.classList.add("tab-active");
       }
 
       const title = document.createElement("span");
@@ -472,7 +510,7 @@ export class ShibuiApp {
       title.textContent = tab.title;
 
       if (this.editingTabId === tab.id) {
-        button.classList.add("tab-editing");
+        tabElement.classList.add("tab-editing");
         const input = document.createElement("input");
         input.type = "text";
         input.className = "tab-title-input";
@@ -505,13 +543,13 @@ export class ShibuiApp {
           input.select();
         });
 
-        button.append(input);
+        tabElement.append(input);
       } else {
         title.addEventListener("dblclick", (event) => {
           event.stopPropagation();
           this.startTabRename(tab.id);
         });
-        button.append(title);
+        tabElement.append(title);
       }
 
       const close = document.createElement("button");
@@ -524,22 +562,35 @@ export class ShibuiApp {
         this.closeTabById(tab.id);
       });
 
-      button.addEventListener("click", () => {
-        if (this.editingTabId !== null && this.editingTabId !== tab.id) {
-          this.commitTabRename(this.editingTabId);
-        }
+      if (this.editingTabId !== tab.id) {
+        tabElement.classList.add("tab-interactive");
+        tabElement.setAttribute("role", "button");
+        tabElement.setAttribute("tabindex", "0");
+        tabElement.addEventListener("click", () => {
+          if (this.editingTabId !== null && this.editingTabId !== tab.id) {
+            this.commitTabRename(this.editingTabId);
+          }
 
-        this.persistEditor();
-        this.tabState = activateTab(this.tabState, tab.id);
-        this.editingTabId = null;
-        this.editingTabTitle = "";
-        this.renderTabs();
-        this.applyActiveTabToEditor();
-      });
+          this.persistEditor();
+          this.tabState = activateTab(this.tabState, tab.id);
+          this.editingTabId = null;
+          this.editingTabTitle = "";
+          this.renderTabs();
+          this.applyActiveTabToEditor();
+        });
+        tabElement.addEventListener("keydown", (event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            tabElement.click();
+          }
+        });
+      }
 
-      button.append(close);
-      this.tabsElement.appendChild(button);
+      tabElement.append(close);
+      this.tabsElement.appendChild(tabElement);
     });
+
+    this.updateTabOverflowState();
   }
 
   private toggleTabBar(): void {
@@ -550,17 +601,36 @@ export class ShibuiApp {
   private updateTabBarVisibility(): void {
     if (this.tabBarCollapsed) {
       this.tabBarElement.classList.add("tabbar-collapsed");
-      this.tabBarToggleButton.textContent = "v";
+      this.tabBarToggleButton.dataset.icon = "v";
       this.tabBarToggleButton.title = "Show tab bar";
+      this.updateTabOverflowState();
       return;
     }
 
     this.tabBarElement.classList.remove("tabbar-collapsed");
-    this.tabBarToggleButton.textContent = "^";
+    this.tabBarToggleButton.dataset.icon = "^";
     this.tabBarToggleButton.title = "Hide tab bar";
+    this.updateTabOverflowState();
+  }
+
+  private updateTabOverflowState(): void {
+    const overflow = tabOverflowState(
+      this.tabsElement.scrollWidth,
+      this.tabsElement.clientWidth,
+      this.tabsElement.scrollLeft,
+    );
+
+    this.tabBarElement.classList.toggle("tabbar-overflowing", overflow.hasOverflow);
+    this.tabsElement.classList.toggle("tabs-overflowing", overflow.hasOverflow);
+    this.tabScrollLeftButton.disabled = !overflow.canScrollLeft;
+    this.tabScrollRightButton.disabled = !overflow.canScrollRight;
   }
 
   private handleTabStripWheel(event: WheelEvent): void {
+    if (this.tabBarCollapsed) {
+      return;
+    }
+
     const maxScroll = this.tabsElement.scrollWidth - this.tabsElement.clientWidth;
     if (maxScroll <= 0) {
       return;
@@ -577,7 +647,23 @@ export class ShibuiApp {
     }
 
     this.tabsElement.scrollLeft = nextScroll;
+    this.updateTabOverflowState();
     event.preventDefault();
+  }
+
+  private scrollTabsBy(delta: number): void {
+    const maxScroll = this.tabsElement.scrollWidth - this.tabsElement.clientWidth;
+    if (maxScroll <= 0) {
+      return;
+    }
+
+    const target = clampScrollPosition(this.tabsElement.scrollLeft + delta, maxScroll);
+    if (target === this.tabsElement.scrollLeft) {
+      return;
+    }
+
+    this.tabsElement.scrollTo({ left: target, behavior: "smooth" });
+    this.updateTabOverflowState();
   }
 
   private newTab(): void {
@@ -736,8 +822,8 @@ export class ShibuiApp {
       return;
     }
 
-    const nextTitle = this.editingTabTitle.trim();
-    const normalizedTitle = nextTitle.length === 0 ? tab.title : nextTitle;
+    const nextTitle = this.editingTabTitle;
+    const normalizedTitle = nextTitle.trim().length === 0 ? tab.title : nextTitle;
 
     this.tabState = updateTabTitle(this.tabState, tabId, normalizedTitle);
     this.editingTabId = null;
@@ -839,6 +925,9 @@ export class ShibuiApp {
         languageExtensionForMode(currentTab.language, this.highlightingEnabled),
       ),
     });
+    this.showShortcutToast(
+      toggleShortcutMessage("highlighting", this.highlightingEnabled, "Cmd/Ctrl+Shift+Y"),
+    );
     return true;
   }
 
@@ -853,7 +942,29 @@ export class ShibuiApp {
         diagnosticsExtensionForMode(this.diagnosticsEnabled),
       ),
     });
+    this.showShortcutToast(toggleShortcutMessage("lint", this.diagnosticsEnabled, "Cmd/Ctrl+Shift+U"));
     return true;
+  }
+
+  private showShortcutToast(message: string): void {
+    const existing = this.root.querySelector(".shortcut-toast");
+    if (existing !== null) {
+      existing.remove();
+    }
+
+    const toast = document.createElement("div");
+    toast.className = "shortcut-toast";
+    toast.textContent = message;
+    this.root.appendChild(toast);
+
+    if (this.toastTimerId !== null) {
+      window.clearTimeout(this.toastTimerId);
+    }
+
+    this.toastTimerId = window.setTimeout(() => {
+      toast.remove();
+      this.toastTimerId = null;
+    }, 1800);
   }
 
   private async openHighlightStyleImport(): Promise<void> {
@@ -946,6 +1057,16 @@ export function diagnosticsExtensionForMode(analysisEnabled: boolean): Extension
   return diagnosticsExtension();
 }
 
+export function toggleShortcutMessage(
+  feature: "highlighting" | "lint",
+  enabled: boolean,
+  shortcut: string,
+): string {
+  const featureLabel = feature === "highlighting" ? "Syntax highlighting" : "Lint diagnostics";
+  const stateLabel = enabled ? "enabled" : "disabled";
+  return `${featureLabel} ${stateLabel} (${shortcut})`;
+}
+
 export function tabStripScrollDelta(event: Pick<WheelEvent, "deltaX" | "deltaY">): number {
   if (Math.abs(event.deltaX) > 0) {
     return event.deltaX;
@@ -968,4 +1089,36 @@ export function clampScrollPosition(nextValue: number, maxValue: number): number
   }
 
   return nextValue;
+}
+
+export function isTabOverflowing(scrollWidth: number, clientWidth: number): boolean {
+  return scrollWidth - clientWidth > 1;
+}
+
+export interface TabOverflowState {
+  hasOverflow: boolean;
+  canScrollLeft: boolean;
+  canScrollRight: boolean;
+}
+
+export function tabOverflowState(
+  scrollWidth: number,
+  clientWidth: number,
+  scrollLeft: number,
+): TabOverflowState {
+  const hasOverflow = isTabOverflowing(scrollWidth, clientWidth);
+  if (!hasOverflow) {
+    return {
+      hasOverflow: false,
+      canScrollLeft: false,
+      canScrollRight: false,
+    };
+  }
+
+  const maxScroll = Math.max(0, scrollWidth - clientWidth);
+  return {
+    hasOverflow: true,
+    canScrollLeft: scrollLeft > 1,
+    canScrollRight: scrollLeft < maxScroll - 1,
+  };
 }

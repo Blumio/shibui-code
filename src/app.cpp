@@ -7,6 +7,10 @@
 
 #include "frontend_bundle.hpp"
 #include "snapshot.hpp"
+#include "window_snap.hpp"
+#if defined(__APPLE__)
+#include "window_snap_mac.hpp"
+#endif
 
 namespace {
 
@@ -163,6 +167,20 @@ int App::Run() {
 }
 
 void App::ResizeWindow(const std::string& direction) {
+  if (!IsSnapDirection(direction)) {
+    return;
+  }
+
+#if defined(__APPLE__)
+  auto native_window = window_.window();
+  if (native_window.has_value()) {
+    if (SnapNativeMacWindow(native_window.value(), direction, window_width_,
+                            window_height_)) {
+      return;
+    }
+  }
+#endif
+
   constexpr int kStep = 90;
   constexpr int kMinWidth = 780;
   constexpr int kMinHeight = 520;
@@ -173,10 +191,8 @@ void App::ResizeWindow(const std::string& direction) {
     window_height_ = std::max(kMinHeight, window_height_ - kStep);
   } else if (direction == "left") {
     window_width_ = std::max(kMinWidth, window_width_ - kStep);
-  } else if (direction == "right") {
-    window_width_ += kStep;
   } else {
-    return;
+    window_width_ += kStep;
   }
 
   window_.set_size(window_width_, window_height_, WEBVIEW_HINT_NONE);

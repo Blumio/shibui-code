@@ -6,7 +6,10 @@ import {
   filterLanguageItems,
   languageExtensionForMode,
   languageTitle,
+  isTabOverflowing,
+  tabOverflowState,
   tabStripScrollDelta,
+  toggleShortcutMessage,
 } from "../app";
 import { languageOptions } from "../language";
 
@@ -40,5 +43,42 @@ describe("app utility functions", () => {
     expect(clampScrollPosition(-10, 100)).toBe(0);
     expect(clampScrollPosition(130, 100)).toBe(100);
     expect(clampScrollPosition(24, 100)).toBe(24);
+  });
+
+  it("builds shortcut toast messages", () => {
+    expect(toggleShortcutMessage("highlighting", true, "Cmd/Ctrl+Shift+Y")).toContain(
+      "Syntax highlighting enabled",
+    );
+    expect(toggleShortcutMessage("lint", false, "Cmd/Ctrl+Shift+U")).toContain(
+      "Lint diagnostics disabled",
+    );
+  });
+
+  it("detects tab-strip overflow", () => {
+    expect(isTabOverflowing(420, 400)).toBe(true);
+    expect(isTabOverflowing(400, 400)).toBe(false);
+  });
+
+  it("computes tab overflow scroll button state", () => {
+    expect(tabOverflowState(400, 400, 0)).toEqual({
+      hasOverflow: false,
+      canScrollLeft: false,
+      canScrollRight: false,
+    });
+    expect(tabOverflowState(700, 400, 0)).toEqual({
+      hasOverflow: true,
+      canScrollLeft: false,
+      canScrollRight: true,
+    });
+    expect(tabOverflowState(700, 400, 180)).toEqual({
+      hasOverflow: true,
+      canScrollLeft: true,
+      canScrollRight: true,
+    });
+    expect(tabOverflowState(700, 400, 300)).toEqual({
+      hasOverflow: true,
+      canScrollLeft: true,
+      canScrollRight: false,
+    });
   });
 });

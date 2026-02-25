@@ -3,6 +3,8 @@
 #include <cassert>
 #include <string>
 
+void RunWindowSnapTests();
+
 void TestNormalizesLineEndings() {
   const std::string input = "line1\r\nline2\rline3\n";
   const std::string expected = "line1\nline2\nline3";
@@ -25,5 +27,6 @@ int main() {
   TestNormalizesLineEndings();
   TestStripsNulBytes();
   TestEmptyFallback();
+  RunWindowSnapTests();
   return 0;
 }
