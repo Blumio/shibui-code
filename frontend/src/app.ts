@@ -1,6 +1,7 @@
 import { defaultKeymap, history, historyKeymap } from "@codemirror/commands";
 import { Compartment, EditorState } from "@codemirror/state";
 import type { Extension } from "@codemirror/state";
+import { codeFolding, foldGutter, foldKeymap } from "@codemirror/language";
 import { EditorView, highlightActiveLineGutter, keymap, lineNumbers } from "@codemirror/view";
 
 import { fuzzyFilter } from "./fuzzy";
@@ -129,13 +130,15 @@ export class ShibuiApp {
   private buildBaseExtensions(): Extension[] {
     return [
       lineNumbers(),
+      foldGutter(),
       highlightActiveLineGutter(),
       history(),
+      codeFolding(),
       diagnosticsExtension(),
       this.themeCompartment.of(this.currentTheme.extension),
       this.languageCompartment.of(languageExtension(activeTab(this.tabState).language)),
       this.placeholderCompartment.of(emptyPlaceholderExtension(this.emptyPagePlaceholder)),
-      keymap.of([...this.editorKeyBindings(), ...historyKeymap, ...defaultKeymap]),
+      keymap.of([...this.editorKeyBindings(), ...foldKeymap, ...historyKeymap, ...defaultKeymap]),
       EditorView.updateListener.of((update) => {
         if (!update.docChanged || this.applyingEditorUpdate) {
           return;
