@@ -1,11 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { clearSnapshot, syncSnapshot } from "../native";
+import { clearSnapshot, resizeWindow, syncSnapshot } from "../native";
 
 describe("native bridge", () => {
   beforeEach(() => {
     delete (window as unknown as { sync_snapshot?: unknown }).sync_snapshot;
     delete (window as unknown as { clear_snapshot?: unknown }).clear_snapshot;
+    delete (window as unknown as { resize_window?: unknown }).resize_window;
   });
 
   it("no-ops when sync bridge is absent", async () => {
@@ -24,5 +25,12 @@ describe("native bridge", () => {
     (window as unknown as { clear_snapshot: () => Promise<boolean> }).clear_snapshot = fn;
     await clearSnapshot();
     expect(fn).toHaveBeenCalled();
+  });
+
+  it("calls resize bridge when present", async () => {
+    const fn = vi.fn().mockResolvedValue(true);
+    (window as unknown as { resize_window: (direction: string) => Promise<boolean> }).resize_window = fn;
+    await resizeWindow("up");
+    expect(fn).toHaveBeenCalledWith("up");
   });
 });

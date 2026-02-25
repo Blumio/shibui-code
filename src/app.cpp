@@ -1,5 +1,6 @@
 #include "app.hpp"
 
+#include <algorithm>
 #include <cctype>
 #include <exception>
 #include <string_view>
@@ -121,7 +122,7 @@ std::string DecodeBoundRequestPayload(const std::string& req) {
 
 App::App() : window_(true, nullptr) {
   window_.set_title("Shibui-Code");
-  window_.set_size(1280, 820, WEBVIEW_HINT_NONE);
+  window_.set_size(window_width_, window_height_, WEBVIEW_HINT_NONE);
   BindNativeApi();
   window_.set_html(kFrontendBundleHtml);
 }
@@ -134,6 +135,11 @@ void App::BindNativeApi() {
 
   window_.bind("clear_snapshot", [this](const std::string&) {
     latest_snapshot_.clear();
+    return std::string("true");
+  });
+
+  window_.bind("resize_window", [this](const std::string& req) {
+    ResizeWindow(DecodeBoundRequestPayload(req));
     return std::string("true");
   });
 }
@@ -154,4 +160,24 @@ int App::Run() {
 
   latest_snapshot_.clear();
   return 0;
+}
+
+void App::ResizeWindow(const std::string& direction) {
+  constexpr int kStep = 90;
+  constexpr int kMinWidth = 780;
+  constexpr int kMinHeight = 520;
+
+  if (direction == "up") {
+    window_height_ += kStep;
+  } else if (direction == "down") {
+    window_height_ = std::max(kMinHeight, window_height_ - kStep);
+  } else if (direction == "left") {
+    window_width_ = std::max(kMinWidth, window_width_ - kStep);
+  } else if (direction == "right") {
+    window_width_ += kStep;
+  } else {
+    return;
+  }
+
+  window_.set_size(window_width_, window_height_, WEBVIEW_HINT_NONE);
 }

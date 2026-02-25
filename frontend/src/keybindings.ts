@@ -13,3 +13,24 @@ export function shortcutDigit(event: KeyboardEvent): number | null {
 
   return Number(event.key);
 }
+
+export type ResizeDirection = "up" | "down" | "left" | "right";
+
+export function resizeDirectionShortcut(event: KeyboardEvent, isMac: boolean): ResizeDirection | null {
+  if (!isMac || !event.ctrlKey || event.metaKey) {
+    return null;
+  }
+
+  switch (event.key) {
+    case "PageUp":
+      return "up";
+    case "PageDown":
+      return "down";
+    case "Home":
+      return "left";
+    case "End":
+      return "right";
+    default:
+      return null;
+  }
+}

@@ -19,11 +19,14 @@ class App {
   int Run();
 
  private:
- void BindNativeApi();
+  void BindNativeApi();
+  void ResizeWindow(const std::string& direction);
 
   webview::webview window_;
   Clipboard clipboard_;
   std::string latest_snapshot_;
+  int window_width_ = 1280;
+  int window_height_ = 820;
 };
 
 #endif

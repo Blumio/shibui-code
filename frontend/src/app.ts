@@ -4,7 +4,7 @@ import type { Extension } from "@codemirror/state";
 import { EditorView, highlightActiveLineGutter, keymap, lineNumbers } from "@codemirror/view";
 
 import { fuzzyFilter } from "./fuzzy";
-import { isPrimaryModifier, shortcutDigit } from "./keybindings";
+import { isPrimaryModifier, resizeDirectionShortcut, shortcutDigit } from "./keybindings";
 import { diagnosticsExtension } from "./linting";
 import {
   languageExtension,
@@ -13,7 +13,7 @@ import {
   type LanguageOption,
 } from "./language";
 import { openHelpModal, openSearchModal, openTextInputModal } from "./modal";
-import { clearSnapshot, syncSnapshot } from "./native";
+import { clearSnapshot, resizeWindow, syncSnapshot } from "./native";
 import { emptyPlaceholderExtension, normalizePlaceholderInput } from "./placeholder";
 import {
   activeTab,
@@ -61,6 +61,8 @@ export class ShibuiApp {
   private editingTabTitle = "";
 
   private modalOpen = false;
+
+  private readonly isMac = navigator.platform.toLowerCase().includes("mac");
 
   constructor(root: HTMLElement) {
     this.root = root;
@@ -239,6 +241,13 @@ export class ShibuiApp {
   }
 
   private handleGlobalShortcuts(event: KeyboardEvent): void {
+    const resizeDirection = resizeDirectionShortcut(event, this.isMac);
+    if (resizeDirection !== null) {
+      event.preventDefault();
+      void resizeWindow(resizeDirection);
+      return;
+    }
+
     if (!isPrimaryModifier(event)) {
       return;
     }
