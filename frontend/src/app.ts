@@ -50,7 +50,13 @@ import type { ListItem, ThemeSpec } from "./types";
 export class ShibuiApp {
   private readonly root: HTMLElement;
 
+  private readonly shellElement: HTMLDivElement;
+
+  private readonly tabBarElement: HTMLDivElement;
+
   private readonly tabsElement: HTMLDivElement;
+
+  private readonly tabBarToggleButton: HTMLButtonElement;
 
   private readonly editorElement: HTMLDivElement;
 
@@ -80,16 +86,18 @@ export class ShibuiApp {
 
   private modalOpen = false;
 
+  private tabBarCollapsed = false;
+
   private readonly isMac = navigator.platform.toLowerCase().includes("mac");
 
   constructor(root: HTMLElement) {
     this.root = root;
 
-    const shell = document.createElement("div");
-    shell.className = "app-shell";
+    this.shellElement = document.createElement("div");
+    this.shellElement.className = "app-shell";
 
-    const tabBar = document.createElement("div");
-    tabBar.className = "tabbar";
+    this.tabBarElement = document.createElement("div");
+    this.tabBarElement.className = "tabbar";
 
     this.tabsElement = document.createElement("div");
     this.tabsElement.className = "tabs";
@@ -110,13 +118,25 @@ export class ShibuiApp {
       this.newTab();
     });
 
-    tabBar.append(this.tabsElement, newTabButton);
+    this.tabBarToggleButton = document.createElement("button");
+    this.tabBarToggleButton.type = "button";
+    this.tabBarToggleButton.className = "tabbar-toggle";
+    this.tabBarToggleButton.textContent = "^";
+    this.tabBarToggleButton.title = "Hide tab bar";
+    this.tabBarToggleButton.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      this.toggleTabBar();
+    });
+
+    this.tabBarElement.append(this.tabsElement, newTabButton, this.tabBarToggleButton);
 
     this.editorElement = document.createElement("div");
     this.editorElement.className = "editor-root";
 
-    shell.append(tabBar, this.editorElement);
-    this.root.appendChild(shell);
+    this.shellElement.append(this.tabBarElement, this.editorElement);
+    this.root.appendChild(this.shellElement);
+    this.updateTabBarVisibility();
   }
 
   async initialize(): Promise<void> {
@@ -507,6 +527,24 @@ export class ShibuiApp {
       button.append(close);
       this.tabsElement.appendChild(button);
     });
+  }
+
+  private toggleTabBar(): void {
+    this.tabBarCollapsed = !this.tabBarCollapsed;
+    this.updateTabBarVisibility();
+  }
+
+  private updateTabBarVisibility(): void {
+    if (this.tabBarCollapsed) {
+      this.tabBarElement.classList.add("tabbar-collapsed");
+      this.tabBarToggleButton.textContent = "v";
+      this.tabBarToggleButton.title = "Show tab bar";
+      return;
+    }
+
+    this.tabBarElement.classList.remove("tabbar-collapsed");
+    this.tabBarToggleButton.textContent = "^";
+    this.tabBarToggleButton.title = "Hide tab bar";
   }
 
   private handleTabStripWheel(event: WheelEvent): void {
