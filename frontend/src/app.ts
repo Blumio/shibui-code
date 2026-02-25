@@ -82,6 +82,13 @@ export class ShibuiApp {
 
     this.tabsElement = document.createElement("div");
     this.tabsElement.className = "tabs";
+    this.tabsElement.addEventListener(
+      "wheel",
+      (event) => {
+        this.handleTabStripWheel(event);
+      },
+      { passive: false },
+    );
 
     const newTabButton = document.createElement("button");
     newTabButton.type = "button";
@@ -442,6 +449,16 @@ export class ShibuiApp {
     });
   }
 
+  private handleTabStripWheel(event: WheelEvent): void {
+    const delta = tabStripScrollDelta(event);
+    if (delta === 0) {
+      return;
+    }
+
+    this.tabsElement.scrollLeft += delta;
+    event.preventDefault();
+  }
+
   private newTab(): void {
     this.cancelTabRename();
     this.persistEditor();
@@ -710,4 +727,16 @@ export function filterLanguageItems(options: LanguageOption[], query: string): L
 
 export function languageTitle(languageId: LanguageOption["id"]): string {
   return languageLabel(languageId);
+}
+
+export function tabStripScrollDelta(event: Pick<WheelEvent, "deltaX" | "deltaY">): number {
+  if (Math.abs(event.deltaX) > 0) {
+    return event.deltaX;
+  }
+
+  if (Math.abs(event.deltaY) > 0) {
+    return event.deltaY;
+  }
+
+  return 0;
 }
