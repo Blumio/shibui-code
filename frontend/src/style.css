@@ -37,31 +37,26 @@ body,
   width: 100%;
   height: 100%;
   display: grid;
-  grid-template-columns: 1fr auto;
+  grid-template-rows: auto 1fr;
 }
 
 .tabbar {
-  grid-column: 2;
-  grid-row: 1;
   display: flex;
-  flex-direction: column;
-  width: 230px;
-  min-width: 230px;
-  min-height: 0;
-  height: 100%;
-  background: linear-gradient(180deg, #151b23 0%, #111820 100%);
-  border-left: 1px solid var(--chrome-border);
-  padding: 8px;
+  align-items: center;
   gap: 8px;
+  min-height: 44px;
+  background: linear-gradient(180deg, #151b23 0%, #111820 100%);
+  border-bottom: 1px solid var(--chrome-border);
+  padding: 6px 8px;
 }
 
 .tabbar-toggle {
   position: absolute;
-  right: 0;
-  top: 50%;
-  transform: translate(50%, -50%);
-  width: 26px;
-  height: 46px;
+  left: 50%;
+  top: 44px;
+  transform: translate(-50%, -50%);
+  width: 46px;
+  height: 26px;
   padding: 0;
   display: flex;
   align-items: center;
@@ -79,7 +74,7 @@ body,
   z-index: 10;
 }
 
-.tabbar:hover ~ .tabbar-toggle,
+.tabbar:hover + .tabbar-toggle,
 .tabbar-toggle:hover {
   opacity: 1;
 }
@@ -91,7 +86,7 @@ body,
 .tabbar-toggle::before {
   content: "";
   position: absolute;
-  inset: 14px 4px;
+  inset: 4px 14px;
   border-radius: 999px;
   border: 1px solid rgba(86, 111, 136, 0.65);
   background: rgba(32, 44, 58, 0.9);
@@ -104,17 +99,13 @@ body,
 }
 
 .tabbar.tabbar-collapsed {
-  width: 0;
-  min-width: 0;
   min-height: 0;
-  padding: 0;
-  border-left: none;
-  gap: 0;
+  padding: 0 8px;
+  border-bottom: none;
 }
 
-.tabbar.tabbar-collapsed ~ .tabbar-toggle {
-  top: 12px;
-  transform: translate(50%, 0);
+.tabbar.tabbar-collapsed + .tabbar-toggle {
+  top: 9.4px;
 }
 
 .tabbar.tabbar-collapsed .tabs,
@@ -129,26 +120,22 @@ body,
 
 .tabbar-controls {
   display: flex;
-  align-items: flex-start;
-  justify-content: flex-end;
+  align-items: center;
   gap: 6px;
   flex: 0 0 auto;
-  width: 100%;
 }
 
 .tabs {
   display: flex;
-  flex-direction: column;
   gap: 6px;
-  overflow-y: auto;
-  overflow-x: hidden;
-  min-height: 0;
+  overflow-x: scroll;
+  overflow-y: hidden;
   min-width: 0;
   scrollbar-width: none;
   -ms-overflow-style: auto;
   scrollbar-gutter: stable;
-  overscroll-behavior-y: contain;
-  overscroll-behavior-x: none;
+  overscroll-behavior-x: contain;
+  overscroll-behavior-y: none;
   touch-action: auto;
   flex: 1;
   position: relative;
@@ -156,7 +143,6 @@ body,
 }
 
 .tabs::-webkit-scrollbar {
-  width: 0;
   height: 0;
 }
 
@@ -174,7 +160,6 @@ body,
 }
 
 .tabs.tabs-overflowing::-webkit-scrollbar {
-  width: 6px;
   height: 6px;
 }
 
@@ -200,8 +185,6 @@ body,
   display: flex;
   flex: 0 0 auto;
   align-items: center;
-  justify-content: space-between;
-  width: 100%;
   gap: 8px;
   border-radius: 8px;
   height: 30px;
@@ -220,7 +203,7 @@ body,
 }
 
 .tab-title {
-  max-width: 140px;
+  max-width: 180px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -233,7 +216,7 @@ body,
 }
 
 .tab-title-input {
-  width: 132px;
+  width: 170px;
   border: none;
   background: transparent;
   color: inherit;
@@ -296,8 +279,6 @@ body,
 }
 
 .editor-root {
-  grid-column: 1;
-  grid-row: 1;
   width: 100%;
   height: 100%;
   overflow: hidden;
