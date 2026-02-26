@@ -95,7 +95,7 @@ if(WIN32)
   set(CPACK_GENERATOR "ZIP;NSIS")
 elseif(APPLE)
   set(CPACK_GENERATOR "DragNDrop;TGZ")
-  set(SHIBUI_DMG_VOLUME_NAME "Shibui-Code")
+  set(SHIBUI_DMG_VOLUME_NAME "Shibui-Code ${PROJECT_VERSION}")
   configure_file(
     "${CMAKE_SOURCE_DIR}/packaging/macos/dmg-setup.applescript.in"
     "${CMAKE_BINARY_DIR}/dmg-setup.applescript"
