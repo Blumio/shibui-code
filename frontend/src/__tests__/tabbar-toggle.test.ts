@@ -13,16 +13,16 @@ describe("tab bar toggle", () => {
     const toggle = root.querySelector(".tabbar-toggle") as HTMLButtonElement;
     const tabbar = root.querySelector(".tabbar") as HTMLDivElement;
 
-    expect(toggle.dataset.icon).toBe("^");
-    expect(tabbar.classList.contains("tabbar-collapsed")).toBe(false);
-
-    toggle.click();
     expect(toggle.dataset.icon).toBe("v");
     expect(tabbar.classList.contains("tabbar-collapsed")).toBe(true);
 
     toggle.click();
     expect(toggle.dataset.icon).toBe("^");
     expect(tabbar.classList.contains("tabbar-collapsed")).toBe(false);
+
+    toggle.click();
+    expect(toggle.dataset.icon).toBe("v");
+    expect(tabbar.classList.contains("tabbar-collapsed")).toBe(true);
 
     root.remove();
   });

@@ -94,7 +94,7 @@ export class ShibuiApp {
 
   private modalOpen = false;
 
-  private tabBarCollapsed = false;
+  private tabBarCollapsed = true;
 
   private toastTimerId: number | null = null;
 
