@@ -10,14 +10,14 @@ describe("tab bar scroll buttons", () => {
     const app = new ShibuiApp(root);
     await app.initialize();
 
-    const left = root.querySelector(".tab-scroll-left") as HTMLButtonElement;
-    const right = root.querySelector(".tab-scroll-right") as HTMLButtonElement;
+    const up = root.querySelector(".tab-scroll-up") as HTMLButtonElement;
+    const down = root.querySelector(".tab-scroll-down") as HTMLButtonElement;
     const controls = root.querySelector(".tabbar-controls") as HTMLDivElement;
-    expect(left).not.toBeNull();
-    expect(right).not.toBeNull();
+    expect(up).not.toBeNull();
+    expect(down).not.toBeNull();
     expect(controls).not.toBeNull();
-    expect(left.parentElement).toBe(controls);
-    expect(right.parentElement).toBe(controls);
+    expect(up.parentElement).toBe(controls);
+    expect(down.parentElement).toBe(controls);
 
     root.remove();
   });

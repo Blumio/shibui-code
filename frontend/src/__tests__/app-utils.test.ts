@@ -23,12 +23,12 @@ describe("app utility functions", () => {
     expect(languageTitle("bash")).toBe("Bash");
   });
 
-  it("prefers horizontal wheel delta for tab strip scrolling", () => {
-    expect(tabStripScrollDelta({ deltaX: 24, deltaY: 120 })).toBe(24);
+  it("prefers vertical wheel delta for right-side tab strip scrolling", () => {
+    expect(tabStripScrollDelta({ deltaX: 24, deltaY: 120 })).toBe(120);
   });
 
-  it("uses vertical wheel delta when horizontal delta is absent", () => {
-    expect(tabStripScrollDelta({ deltaX: 0, deltaY: -90 })).toBe(-90);
+  it("falls back to horizontal wheel delta when vertical delta is absent", () => {
+    expect(tabStripScrollDelta({ deltaX: -90, deltaY: 0 })).toBe(-90);
   });
 
   it("returns no language extension when analysis mode is disabled", () => {
@@ -62,23 +62,23 @@ describe("app utility functions", () => {
   it("computes tab overflow scroll button state", () => {
     expect(tabOverflowState(400, 400, 0)).toEqual({
       hasOverflow: false,
-      canScrollLeft: false,
-      canScrollRight: false,
+      canScrollUp: false,
+      canScrollDown: false,
     });
     expect(tabOverflowState(700, 400, 0)).toEqual({
       hasOverflow: true,
-      canScrollLeft: false,
-      canScrollRight: true,
+      canScrollUp: false,
+      canScrollDown: true,
     });
     expect(tabOverflowState(700, 400, 180)).toEqual({
       hasOverflow: true,
-      canScrollLeft: true,
-      canScrollRight: true,
+      canScrollUp: true,
+      canScrollDown: true,
     });
     expect(tabOverflowState(700, 400, 300)).toEqual({
       hasOverflow: true,
-      canScrollLeft: true,
-      canScrollRight: false,
+      canScrollUp: true,
+      canScrollDown: false,
     });
   });
 });
