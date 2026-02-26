@@ -10,3 +10,4 @@ cmake -S . -B "$BUILD_DIR" -DSHIBUI_BUILD_TESTS=ON -DCMAKE_BUILD_TYPE=Release
 cmake --build "$BUILD_DIR" --config Release
 ctest --test-dir "$BUILD_DIR" --output-on-failure
 cpack --config "$BUILD_DIR/CPackConfig.cmake"
+rm -rf "$ROOT_DIR/_CPack_Packages"

@@ -170,9 +170,9 @@ npm run package:macos
 npm run package:windows
 ```
 
-Packaging uses CPack generators:
+Packaging outputs:
 - Linux: `TGZ`, `DEB`
-- macOS: `DragNDrop`, `TGZ`
+- macOS: styled drag-and-drop `DMG` + `TGZ`
 - Windows: `ZIP`, `NSIS`
 
 ## CLI Publishing Instructions

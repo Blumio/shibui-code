@@ -16,7 +16,9 @@ Outputs in build folder and root packaging output depending on generator (`.tgz`
 npm run package:macos
 ```
 
-Generates `.dmg` / `.tgz` with CPack (depending on available generator support).
+Generates:
+- A styled drag-and-drop `.dmg` (custom background, app icon placement, Applications shortcut).
+- A `.tgz` archive via CPack.
 
 ## Windows
 
