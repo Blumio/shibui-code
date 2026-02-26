@@ -58,9 +58,9 @@ export class ShibuiApp {
 
   private readonly tabControlsElement: HTMLDivElement;
 
-  private readonly tabScrollUpButton: HTMLButtonElement;
+  private readonly tabScrollLeftButton: HTMLButtonElement;
 
-  private readonly tabScrollDownButton: HTMLButtonElement;
+  private readonly tabScrollRightButton: HTMLButtonElement;
 
   private readonly tabBarToggleButton: HTMLButtonElement;
 
@@ -125,22 +125,22 @@ export class ShibuiApp {
     this.tabControlsElement = document.createElement("div");
     this.tabControlsElement.className = "tabbar-controls";
 
-    this.tabScrollUpButton = document.createElement("button");
-    this.tabScrollUpButton.type = "button";
-    this.tabScrollUpButton.className = "tab-scroll tab-scroll-up";
-    this.tabScrollUpButton.textContent = "^";
-    this.tabScrollUpButton.title = "Scroll tabs up";
-    this.tabScrollUpButton.addEventListener("click", () => {
-      this.scrollTabsBy(-200);
+    this.tabScrollLeftButton = document.createElement("button");
+    this.tabScrollLeftButton.type = "button";
+    this.tabScrollLeftButton.className = "tab-scroll tab-scroll-left";
+    this.tabScrollLeftButton.textContent = "<";
+    this.tabScrollLeftButton.title = "Scroll tabs left";
+    this.tabScrollLeftButton.addEventListener("click", () => {
+      this.scrollTabsBy(-220);
     });
 
-    this.tabScrollDownButton = document.createElement("button");
-    this.tabScrollDownButton.type = "button";
-    this.tabScrollDownButton.className = "tab-scroll tab-scroll-down";
-    this.tabScrollDownButton.textContent = "v";
-    this.tabScrollDownButton.title = "Scroll tabs down";
-    this.tabScrollDownButton.addEventListener("click", () => {
-      this.scrollTabsBy(200);
+    this.tabScrollRightButton = document.createElement("button");
+    this.tabScrollRightButton.type = "button";
+    this.tabScrollRightButton.className = "tab-scroll tab-scroll-right";
+    this.tabScrollRightButton.textContent = ">";
+    this.tabScrollRightButton.title = "Scroll tabs right";
+    this.tabScrollRightButton.addEventListener("click", () => {
+      this.scrollTabsBy(220);
     });
 
     const newTabButton = document.createElement("button");
@@ -156,7 +156,7 @@ export class ShibuiApp {
     this.tabBarToggleButton.type = "button";
     this.tabBarToggleButton.className = "tabbar-toggle";
     this.tabBarToggleButton.textContent = "";
-    this.tabBarToggleButton.dataset.icon = ">";
+    this.tabBarToggleButton.dataset.icon = "^";
     this.tabBarToggleButton.title = "Hide tab bar";
     this.tabBarToggleButton.addEventListener("click", (event) => {
       event.preventDefault();
@@ -164,13 +164,13 @@ export class ShibuiApp {
       this.toggleTabBar();
     });
 
-    this.tabControlsElement.append(this.tabScrollUpButton, this.tabScrollDownButton, newTabButton);
-    this.tabBarElement.append(this.tabControlsElement, this.tabsElement);
+    this.tabControlsElement.append(this.tabScrollLeftButton, this.tabScrollRightButton, newTabButton);
+    this.tabBarElement.append(this.tabsElement, this.tabControlsElement);
 
     this.editorElement = document.createElement("div");
     this.editorElement.className = "editor-root";
 
-    this.shellElement.append(this.editorElement, this.tabBarElement, this.tabBarToggleButton);
+    this.shellElement.append(this.tabBarElement, this.tabBarToggleButton, this.editorElement);
     this.root.appendChild(this.shellElement);
     this.updateTabBarVisibility();
   }
@@ -355,12 +355,12 @@ export class ShibuiApp {
         run: () => this.switchTabByNumber(9),
       },
       {
-        key: "Mod-ArrowUp",
+        key: "Mod-ArrowLeft",
         preventDefault: true,
         run: () => this.switchToPreviousTab(),
       },
       {
-        key: "Mod-ArrowDown",
+        key: "Mod-ArrowRight",
         preventDefault: true,
         run: () => this.switchToNextTab(),
       },
@@ -443,13 +443,13 @@ export class ShibuiApp {
       return;
     }
 
-    if (event.key === "ArrowUp") {
+    if (event.key === "ArrowLeft") {
       event.preventDefault();
       this.switchToPreviousTab();
       return;
     }
 
-    if (event.key === "ArrowDown") {
+    if (event.key === "ArrowRight") {
       event.preventDefault();
       this.switchToNextTab();
       return;
@@ -601,29 +601,29 @@ export class ShibuiApp {
   private updateTabBarVisibility(): void {
     if (this.tabBarCollapsed) {
       this.tabBarElement.classList.add("tabbar-collapsed");
-      this.tabBarToggleButton.dataset.icon = "<";
+      this.tabBarToggleButton.dataset.icon = "v";
       this.tabBarToggleButton.title = "Show tab bar";
       this.updateTabOverflowState();
       return;
     }
 
     this.tabBarElement.classList.remove("tabbar-collapsed");
-    this.tabBarToggleButton.dataset.icon = ">";
+    this.tabBarToggleButton.dataset.icon = "^";
     this.tabBarToggleButton.title = "Hide tab bar";
     this.updateTabOverflowState();
   }
 
   private updateTabOverflowState(): void {
     const overflow = tabOverflowState(
-      this.tabsElement.scrollHeight,
-      this.tabsElement.clientHeight,
-      this.tabsElement.scrollTop,
+      this.tabsElement.scrollWidth,
+      this.tabsElement.clientWidth,
+      this.tabsElement.scrollLeft,
     );
 
     this.tabBarElement.classList.toggle("tabbar-overflowing", overflow.hasOverflow);
     this.tabsElement.classList.toggle("tabs-overflowing", overflow.hasOverflow);
-    this.tabScrollUpButton.disabled = !overflow.canScrollUp;
-    this.tabScrollDownButton.disabled = !overflow.canScrollDown;
+    this.tabScrollLeftButton.disabled = !overflow.canScrollLeft;
+    this.tabScrollRightButton.disabled = !overflow.canScrollRight;
   }
 
   private handleTabStripWheel(event: WheelEvent): void {
@@ -631,7 +631,7 @@ export class ShibuiApp {
       return;
     }
 
-    const maxScroll = this.tabsElement.scrollHeight - this.tabsElement.clientHeight;
+    const maxScroll = this.tabsElement.scrollWidth - this.tabsElement.clientWidth;
     if (maxScroll <= 0) {
       return;
     }
@@ -641,28 +641,28 @@ export class ShibuiApp {
       return;
     }
 
-    const nextScroll = clampScrollPosition(this.tabsElement.scrollTop + delta, maxScroll);
-    if (nextScroll === this.tabsElement.scrollTop) {
+    const nextScroll = clampScrollPosition(this.tabsElement.scrollLeft + delta, maxScroll);
+    if (nextScroll === this.tabsElement.scrollLeft) {
       return;
     }
 
-    this.tabsElement.scrollTop = nextScroll;
+    this.tabsElement.scrollLeft = nextScroll;
     this.updateTabOverflowState();
     event.preventDefault();
   }
 
   private scrollTabsBy(delta: number): void {
-    const maxScroll = this.tabsElement.scrollHeight - this.tabsElement.clientHeight;
+    const maxScroll = this.tabsElement.scrollWidth - this.tabsElement.clientWidth;
     if (maxScroll <= 0) {
       return;
     }
 
-    const target = clampScrollPosition(this.tabsElement.scrollTop + delta, maxScroll);
-    if (target === this.tabsElement.scrollTop) {
+    const target = clampScrollPosition(this.tabsElement.scrollLeft + delta, maxScroll);
+    if (target === this.tabsElement.scrollLeft) {
       return;
     }
 
-    this.tabsElement.scrollTo({ top: target, behavior: "smooth" });
+    this.tabsElement.scrollTo({ left: target, behavior: "smooth" });
     this.updateTabOverflowState();
   }
 
@@ -891,7 +891,7 @@ export class ShibuiApp {
       { shortcut: "Cmd/Ctrl+Shift+Y", description: "Toggle syntax highlighting." },
       { shortcut: "Cmd/Ctrl+Shift+U", description: "Toggle lint diagnostics." },
       { shortcut: "Cmd/Ctrl+1..9", description: "Switch to tab by index." },
-      { shortcut: "Cmd/Ctrl+Up/Down", description: "Switch to previous/next tab." },
+      { shortcut: "Cmd/Ctrl+Left/Right", description: "Switch to previous/next tab." },
       { shortcut: "Escape", description: "Close open modal dialogs." },
     ];
   }
@@ -1068,12 +1068,12 @@ export function toggleShortcutMessage(
 }
 
 export function tabStripScrollDelta(event: Pick<WheelEvent, "deltaX" | "deltaY">): number {
-  if (Math.abs(event.deltaY) > 0) {
-    return event.deltaY;
-  }
-
   if (Math.abs(event.deltaX) > 0) {
     return event.deltaX;
+  }
+
+  if (Math.abs(event.deltaY) > 0) {
+    return event.deltaY;
   }
 
   return 0;
@@ -1097,28 +1097,28 @@ export function isTabOverflowing(scrollWidth: number, clientWidth: number): bool
 
 export interface TabOverflowState {
   hasOverflow: boolean;
-  canScrollUp: boolean;
-  canScrollDown: boolean;
+  canScrollLeft: boolean;
+  canScrollRight: boolean;
 }
 
 export function tabOverflowState(
-  scrollHeight: number,
-  clientHeight: number,
-  scrollTop: number,
+  scrollWidth: number,
+  clientWidth: number,
+  scrollLeft: number,
 ): TabOverflowState {
-  const hasOverflow = isTabOverflowing(scrollHeight, clientHeight);
+  const hasOverflow = isTabOverflowing(scrollWidth, clientWidth);
   if (!hasOverflow) {
     return {
       hasOverflow: false,
-      canScrollUp: false,
-      canScrollDown: false,
+      canScrollLeft: false,
+      canScrollRight: false,
     };
   }
 
-  const maxScroll = Math.max(0, scrollHeight - clientHeight);
+  const maxScroll = Math.max(0, scrollWidth - clientWidth);
   return {
     hasOverflow: true,
-    canScrollUp: scrollTop > 1,
-    canScrollDown: scrollTop < maxScroll - 1,
+    canScrollLeft: scrollLeft > 1,
+    canScrollRight: scrollLeft < maxScroll - 1,
   };
 }
