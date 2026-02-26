@@ -95,9 +95,15 @@ if(WIN32)
   set(CPACK_GENERATOR "ZIP;NSIS")
 elseif(APPLE)
   set(CPACK_GENERATOR "DragNDrop;TGZ")
-  set(CPACK_DMG_VOLUME_NAME "Shibui-Code")
+  set(SHIBUI_DMG_VOLUME_NAME "Shibui-Code")
+  configure_file(
+    "${CMAKE_SOURCE_DIR}/packaging/macos/dmg-setup.applescript.in"
+    "${CMAKE_BINARY_DIR}/dmg-setup.applescript"
+    @ONLY
+  )
+  set(CPACK_DMG_VOLUME_NAME "${SHIBUI_DMG_VOLUME_NAME}")
   set(CPACK_DMG_BACKGROUND_IMAGE "${CMAKE_SOURCE_DIR}/assets/dmg/dmg-background.png")
-  set(CPACK_DMG_DS_STORE_SETUP_SCRIPT "${CMAKE_SOURCE_DIR}/packaging/macos/dmg-setup.applescript")
+  set(CPACK_DMG_DS_STORE_SETUP_SCRIPT "${CMAKE_BINARY_DIR}/dmg-setup.applescript")
   set(CPACK_DMG_DISABLE_APPLICATIONS_SYMLINK OFF)
   set(CPACK_DMG_FILESYSTEM "HFS+")
   set(CPACK_DMG_FORMAT "UDZO")
