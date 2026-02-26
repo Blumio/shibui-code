@@ -98,8 +98,6 @@ export class ShibuiApp {
 
   private toastTimerId: number | null = null;
 
-  private tabsResizeObserver: ResizeObserver | null = null;
-
   private readonly isMac = navigator.platform.toLowerCase().includes("mac");
 
   constructor(root: HTMLElement) {
@@ -110,16 +108,16 @@ export class ShibuiApp {
 
     this.tabBarElement = document.createElement("div");
     this.tabBarElement.className = "tabbar";
-
-    this.tabsElement = document.createElement("div");
-    this.tabsElement.className = "tabs";
-    this.tabsElement.addEventListener(
+    this.tabBarElement.addEventListener(
       "wheel",
       (event) => {
         this.handleTabStripWheel(event);
       },
       { passive: false },
     );
+
+    this.tabsElement = document.createElement("div");
+    this.tabsElement.className = "tabs";
     this.tabsElement.addEventListener("scroll", () => {
       this.updateTabOverflowState();
     });
@@ -189,20 +187,11 @@ export class ShibuiApp {
     window.addEventListener("beforeunload", () => {
       this.flushSnapshot();
       this.tabState = clearTabs();
-      this.tabsResizeObserver?.disconnect();
-      this.tabsResizeObserver = null;
     });
 
     window.addEventListener("resize", () => {
       this.updateTabOverflowState();
     });
-
-    if ("ResizeObserver" in window) {
-      this.tabsResizeObserver = new ResizeObserver(() => {
-        this.updateTabOverflowState();
-      });
-      this.tabsResizeObserver.observe(this.tabsElement);
-    }
 
     await clearSnapshot();
     this.flushSnapshot();
@@ -602,9 +591,6 @@ export class ShibuiApp {
     });
 
     this.updateTabOverflowState();
-    requestAnimationFrame(() => {
-      this.updateTabOverflowState();
-    });
   }
 
   private toggleTabBar(): void {
