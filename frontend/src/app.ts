@@ -883,11 +883,6 @@ export class ShibuiApp {
       { shortcut: "Cmd/Ctrl+L", description: "Open language selection." },
       { shortcut: "Cmd/Ctrl+P", description: "Configure empty-page placeholder text." },
       { shortcut: "Cmd/Ctrl+H", description: "Show this help window." },
-      {
-        shortcut: "Cmd/Ctrl+Shift+J",
-        description: "Import session-only syntax highlighting CSS.",
-      },
-      { shortcut: "Cmd/Ctrl+Shift+K", description: "Import session-only lint CSS." },
       { shortcut: "Cmd/Ctrl+Shift+Y", description: "Toggle syntax highlighting." },
       { shortcut: "Cmd/Ctrl+Shift+U", description: "Toggle lint diagnostics." },
       { shortcut: "Cmd/Ctrl+1..9", description: "Switch to tab by index." },
