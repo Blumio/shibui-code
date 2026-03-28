@@ -12,8 +12,8 @@ tell application "Finder"
     set text size of viewOptions to 14
     set background picture of viewOptions to file ".background:background.png"
 
-    set position of item "shibui-code.app" to {180, 210}
-    set position of item "Applications" to {480, 210}
+    set position of item "shibui-code.app" to {180, 230}
+    set position of item "Applications" to {480, 230}
 
     close
     open
