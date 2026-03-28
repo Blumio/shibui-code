@@ -26,4 +26,33 @@ describe("tab bar toggle", () => {
 
     root.remove();
   });
+
+  it("reveals the tab bar when opening or closing tabs via keyboard shortcuts", async () => {
+    const root = document.createElement("div");
+    document.body.appendChild(root);
+
+    const app = new ShibuiApp(root);
+    await app.initialize();
+
+    const toggle = root.querySelector(".tabbar-toggle") as HTMLButtonElement;
+    const tabbar = root.querySelector(".tabbar") as HTMLDivElement;
+    const bindings = (
+      app as unknown as {
+        editorKeyBindings: () => Array<{ key?: string; run?: () => boolean }>;
+      }
+    ).editorKeyBindings();
+    const newTabBinding = bindings.find((binding) => binding.key === "Mod-n");
+    const closeTabBinding = bindings.find((binding) => binding.key === "Mod-w");
+
+    expect(tabbar.classList.contains("tabbar-collapsed")).toBe(true);
+    expect(newTabBinding?.run?.()).toBe(true);
+    expect(tabbar.classList.contains("tabbar-collapsed")).toBe(false);
+
+    toggle.click();
+    expect(tabbar.classList.contains("tabbar-collapsed")).toBe(true);
+    expect(closeTabBinding?.run?.()).toBe(true);
+    expect(tabbar.classList.contains("tabbar-collapsed")).toBe(false);
+
+    root.remove();
+  });
 });

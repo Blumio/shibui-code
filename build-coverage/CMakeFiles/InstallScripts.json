@@ -1,0 +1,10 @@
+{
+	"InstallScripts" : 
+	[
+		"/Users/matthiasblum/projects/shibui-code/build-coverage/cmake_install.cmake",
+		"/Users/matthiasblum/projects/shibui-code/build-coverage/_deps/webview-build/cmake_install.cmake",
+		"/Users/matthiasblum/projects/shibui-code/build-coverage/_deps/webview-build/compatibility/cmake_install.cmake",
+		"/Users/matthiasblum/projects/shibui-code/build-coverage/_deps/webview-build/core/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

@@ -246,7 +246,7 @@ export class ShibuiApp {
         key: "Mod-n",
         preventDefault: true,
         run: () => {
-          this.newTab();
+          this.newTab(true);
           return true;
         },
       },
@@ -254,7 +254,7 @@ export class ShibuiApp {
         key: "Mod-w",
         preventDefault: true,
         run: () => {
-          this.closeActiveTab();
+          this.closeActiveTab(true);
           return true;
         },
       },
@@ -373,13 +373,13 @@ export class ShibuiApp {
 
     if (event.key.toLowerCase() === "n") {
       event.preventDefault();
-      this.newTab();
+      this.newTab(true);
       return;
     }
 
     if (event.key.toLowerCase() === "w") {
       event.preventDefault();
-      this.closeActiveTab();
+      this.closeActiveTab(true);
       return;
     }
 
@@ -636,7 +636,20 @@ export class ShibuiApp {
     this.updateTabOverflowState();
   }
 
-  private newTab(): void {
+  private revealTabBarForShortcut(): void {
+    if (!this.tabBarCollapsed) {
+      return;
+    }
+
+    this.tabBarCollapsed = false;
+    this.updateTabBarVisibility();
+  }
+
+  private newTab(fromShortcut = false): void {
+    if (fromShortcut) {
+      this.revealTabBarForShortcut();
+    }
+
     this.cancelTabRename();
     this.persistEditor();
     this.tabState = addTab(this.tabState);
@@ -645,7 +658,11 @@ export class ShibuiApp {
     this.scheduleSnapshotSync();
   }
 
-  private closeTabById(tabId: number): void {
+  private closeTabById(tabId: number, fromShortcut = false): void {
+    if (fromShortcut) {
+      this.revealTabBarForShortcut();
+    }
+
     this.cancelTabRename();
     this.persistEditor();
     this.tabState = closeTab(this.tabState, tabId);
@@ -654,8 +671,8 @@ export class ShibuiApp {
     this.scheduleSnapshotSync();
   }
 
-  private closeActiveTab(): void {
-    this.closeTabById(this.tabState.activeTabId);
+  private closeActiveTab(fromShortcut = false): void {
+    this.closeTabById(this.tabState.activeTabId, fromShortcut);
   }
 
   private switchTabByNumber(oneBasedIndex: number): boolean {

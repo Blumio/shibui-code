@@ -1,0 +1,1 @@
+/usr/bin/c++ --coverage -O0 -g -g -arch arm64 -Wl,-search_paths_first -Wl,-headerpad_max_install_names --coverage "CMakeFiles/shibui-unit-tests.dir/tests/cpp/test_snapshot.cpp.o" "CMakeFiles/shibui-unit-tests.dir/tests/cpp/test_window_snap.cpp.o" "CMakeFiles/shibui-unit-tests.dir/src/snapshot.cpp.o" "CMakeFiles/shibui-unit-tests.dir/src/window_snap.cpp.o" -o shibui-unit-tests

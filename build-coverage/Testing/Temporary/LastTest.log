@@ -1,0 +1,18 @@
+Start testing: Mar 28 19:33 CET
+----------------------------------------------------------
+1/1 Testing: shibui-unit-tests
+1/1 Test: shibui-unit-tests
+Command: "/Users/matthiasblum/projects/shibui-code/build-coverage/shibui-unit-tests"
+Directory: /Users/matthiasblum/projects/shibui-code/build-coverage
+"shibui-unit-tests" start time: Mar 28 19:33 CET
+Output:
+----------------------------------------------------------
+<end of output>
+Test time =   0.26 sec
+----------------------------------------------------------
+Test Passed.
+"shibui-unit-tests" end time: Mar 28 19:33 CET
+"shibui-unit-tests" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Mar 28 19:33 CET

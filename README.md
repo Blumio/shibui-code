@@ -133,7 +133,7 @@ npm --prefix frontend run test
 6. Run python contract tests:
 
 ```bash
-pytest -q
+python3 -m pytest -q
 ```
 
 ## Build Commands
@@ -149,6 +149,14 @@ npm run build
 ```bash
 npm test
 ```
+
+- Unified coverage run (frontend + native + python):
+
+```bash
+npm run coverage
+```
+
+See `/Users/matthiasblum/projects/shibui-code/docs/coverage.md` for prerequisites and output paths.
 
 ## Packaging
 
