@@ -40,7 +40,7 @@ const EXTENSIONS: Record<LanguageId, Extension> = {
   javascript: javascript({ jsx: true }),
   typescript: javascript({ typescript: true }),
   cpp: cpp(),
-  c: cpp({ dialect: "c" }),
+  c: cpp(),
   rust: rust(),
   java: java(),
   go: go(),

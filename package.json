@@ -3,19 +3,37 @@
   "version": "1.0.0",
   "description": "Distraction-free code scribbling desktop editor built with C++, GTK and CodeMirror 6.",
   "type": "module",
+  "author": "Blumio",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Blumio/shibui-code.git"
+  },
+  "homepage": "https://github.com/Blumio/shibui-code#readme",
+  "bugs": {
+    "url": "https://github.com/Blumio/shibui-code/issues"
+  },
+  "main": "./cli/shibui-code.js",
+  "exports": {
+    ".": "./cli/shibui-code.js",
+    "./package.json": "./package.json"
+  },
   "bin": {
     "shibui-code": "cli/shibui-code.js"
   },
   "scripts": {
     "postinstall": "node cli/scripts/postinstall.js",
+    "prepack": "npm run build:frontend",
     "build:frontend": "npm --prefix frontend run build && node scripts/embed-frontend.mjs",
     "build:native": "node cli/scripts/build-native.js",
     "build": "npm run build:frontend && npm run build:native",
+    "typecheck": "npm --prefix frontend run typecheck",
+    "lint": "npm run typecheck",
     "test:frontend": "npm --prefix frontend run test",
     "test:native": "node cli/scripts/build-native.js --with-tests && ctest --test-dir .native-build/$(node -p \"process.platform + '-' + process.arch\") --output-on-failure",
     "test:python": "python3 -m pytest -q",
     "test": "npm run test:frontend && npm run test:native && npm run test:python",
+    "pack:dry-run": "npm pack --dry-run",
     "package:linux": "bash scripts/package-linux.sh",
     "package:macos": "bash scripts/package-macos.sh",
     "package:windows": "powershell -ExecutionPolicy Bypass -File scripts/package-windows.ps1",
@@ -26,15 +44,19 @@
   },
   "files": [
     "CMakeLists.txt",
-    "cmake",
     "cli",
-    "docs",
-    "frontend",
-    "scripts",
+    "LICENSE",
+    "docs/packaging.md",
+    "assets/dmg/dmg-background.png",
+    "assets/icons/shibui-code.icns",
+    "packaging/macos/dmg-setup.applescript.in",
     "src",
-    "tests",
     "README.md"
   ],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
   "keywords": [
     "desktop",
     "editor",

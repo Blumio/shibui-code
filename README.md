@@ -1,279 +1,133 @@
 # Shibui-Code
 
-Shibui-Code is a distraction-free desktop code scribbling editor for deliberate practice.
+Shibui-Code is a distraction-free desktop code scribbling app for deliberate coding practice.
 
-It is intentionally constrained:
-- Syntax highlighting for common languages
-- Lint-style static diagnostics (errors/warnings)
-- Temporary tabs only
-- No file save/load
-- No completion, snippets, refactoring, AI, or IntelliSense
+![Shibui-Code icon](assets/icons/shibui-code.png)
 
-## Stack
+## Why this exists
 
-- Native shell: **C++20**
-- Cross-platform desktop runtime: **webview** (GTK/WebKit backend on Linux)
-- Editor: **CodeMirror 6** (TypeScript frontend)
-- Build: **CMake + CPack**
-- CLI install/launch: **npm global package with `shibui-code` bin**
+Most editors optimize for large projects and productivity workflows. Shibui-Code optimizes for focused thinking in temporary scratch sessions.
 
-## Features
+## Who it is for
 
-- Supported languages:
-  - JavaScript
-  - TypeScript
-  - Python
-  - C++
-  - C
-  - Rust
-  - Java
-  - Go
-  - HTML
-  - CSS
-  - JSON
-  - Bash
-  - Markdown
-- Line numbers
-- Multi-tab editor with top tab bar
-- Theme Search Mode (`Ctrl+S`) with fuzzy search and instant apply
-- Built-in themes at top:
-  - VS Code Dark+
-  - Monokai
-  - Dracula
-  - Solarized Dark
-  - Solarized Light
-  - GitHub Light
-- Static diagnostics:
-  - Syntax error underlines when parser reports errors
-  - Warning markers for trailing whitespace
-  - Warning markers for long lines (>120 chars)
-- Clipboard export on close:
-  - Editor session snapshot copied to system clipboard on app exit
-  - In-memory tab data cleared on close
+- Developers practicing syntax and problem-solving
+- Interview prep sessions
+- Teaching/demo sessions where persistence is unnecessary
+- Anyone who wants a clean, low-distraction editor shell without any helping tools
 
-## Keyboard Shortcuts
+## Why it is technically interesting
 
-- `Ctrl+N` -> New tab
-- `Ctrl+W` -> Close tab
-- `Ctrl+S` -> Open Theme Search Mode
-- `Ctrl+L` -> Open language selection palette
-- `Ctrl+1..9` -> Switch tabs
+- Native desktop host in C++20 with platform webview backends
+- Embedded CodeMirror 6 frontend bundled into a native header
+- Strict no-persistence runtime constraints
+- Cross-platform packaging via CMake + CPack
 
-## Strict Runtime Constraints
+## Install
 
-The app does not:
-- Save files
-- Load files
-- Persist sessions
-- Call external APIs
-- Send telemetry/analytics
-- Load plugins/extensions
-- Auto-update
-
-## Prerequisites
-
-- Node.js 20+
-- CMake 3.24+
-- C++20 compiler toolchain
-- Python 3.10+ (for repo tests)
-
-### Linux packages (Ubuntu/Debian)
-
-```bash
-sudo apt-get update
-sudo apt-get install -y build-essential cmake pkg-config libgtk-3-dev libwebkit2gtk-4.1-dev
-```
-
-## Global CLI Installation
+### Global CLI install
 
 ```bash
 npm install -g shibui-code
 ```
 
-Launch:
+### Launch
 
 ```bash
 shibui-code
 ```
 
-The package postinstall builds a native binary for the current platform. First launch also triggers build if needed.
+The package builds a native binary during install/first launch when needed.
 
-## Local Development
+## Hello world in 30 seconds
 
-1. Install frontend deps:
+```bash
+shibui-code
+```
+
+Inside the app:
+
+1. Press `Ctrl+N` for a new tab.
+2. Press `Ctrl+L` and choose a language.
+3. Type code.
+4. Close the app to copy the full session snapshot to your clipboard.
+
+See [examples/hello-world/README.md](examples/hello-world/README.md) for a minimal walkthrough.
+
+## Key features
+
+- Multi-tab temporary editor sessions
+- Language selection for common programming languages
+- Theme search mode (`Ctrl+S`) with fuzzy matching
+- Static diagnostics (syntax errors, trailing whitespace, long lines)
+- Clipboard snapshot export on app close
+- No telemetry, plugins, cloud sync, or hidden background services
+
+## Keyboard shortcuts
+
+- `Ctrl+N`: new tab
+- `Ctrl+W`: close tab
+- `Ctrl+S`: open theme search mode
+- `Ctrl+L`: open language selector
+- `Ctrl+1..9`: switch tabs
+
+## Architecture and design choices
+
+- Native shell: C++20 + webview
+- Frontend: TypeScript + CodeMirror 6
+- Build/package: CMake + CPack
+- CLI distribution: npm package with `shibui-code` bin
+
+Details:
+- [docs/packaging.md](docs/packaging.md)
+
+## Tradeoffs and limitations
+
+Shibui-Code intentionally does not support:
+
+- File save/load
+- Session persistence
+- Code completion/snippets/refactoring
+- Plugin ecosystems
+- External API calls and telemetry
+
+This app is not meant as a full IDE and is intentionally kept bare bones for maximum focus.
+
+## Local development
 
 ```bash
 npm --prefix frontend install
-```
-
-2. Build frontend bundle and embed into C++ header:
-
-```bash
 npm run build:frontend
-```
-
-3. Build native binary:
-
-```bash
-node cli/scripts/build-native.js --with-tests
-```
-
-4. Run native unit tests:
-
-```bash
-ctest --test-dir .native-build/$(node -p "process.platform + '-' + process.arch") --output-on-failure
-```
-
-5. Run frontend unit tests:
-
-```bash
-npm --prefix frontend run test
-```
-
-6. Run python contract tests:
-
-```bash
-python3 -m pytest -q
-```
-
-## Build Commands
-
-- Full build:
-
-```bash
 npm run build
 ```
 
-- Full test run:
+## Quality checks
 
 ```bash
+npm run lint
 npm test
 ```
-
-- Unified coverage run (frontend + native + python):
-
-```bash
-npm run coverage
-```
-
-See `/Users/matthiasblum/projects/shibui-code/docs/coverage.md` for prerequisites and output paths.
 
 ## Packaging
 
-- Linux package build:
-
 ```bash
 npm run package:linux
-```
-
-- macOS package build:
-
-```bash
 npm run package:macos
-```
-
-- Windows package build:
-
-```powershell
 npm run package:windows
 ```
 
-Packaging outputs:
-- Linux: `TGZ`, `DEB`
-- macOS: styled drag-and-drop `DMG` + `TGZ`
-- Windows: `ZIP`, `NSIS`
+## Roadmap
 
-## CLI Publishing Instructions
+- Add cross-platform install smoke tests in CI
+- Publish reproducible release notes per version
+- Expand theme packs while keeping startup fast
+- Tighten native error reporting for missing runtime deps
 
-1. Ensure clean repository state.
-2. Update version in `/Users/matthiasblum/projects/shibui-code/package.json`.
-3. Run full tests:
+## Security and contribution
 
-```bash
-npm test
-```
+- [CONTRIBUTING.md](CONTRIBUTING.md)
+- [SECURITY.md](SECURITY.md)
+- [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
 
-4. Login to npm:
+## Release process
 
-```bash
-npm login
-```
-
-5. Publish:
-
-```bash
-npm publish --access public
-```
-
-After publish, users install globally with:
-
-```bash
-npm install -g shibui-code
-```
-
-## Project Structure
-
-```text
-.
-├── .github/workflows/ci.yml
-├── CMakeLists.txt
-├── README.md
-├── cli/
-│   ├── shibui-code.js
-│   └── scripts/
-│       ├── build-native.js
-│       ├── detect-platform.js
-│       └── postinstall.js
-├── docs/
-│   ├── architecture.md
-│   ├── installation.md
-│   └── packaging.md
-├── frontend/
-│   ├── index.html
-│   ├── package.json
-│   ├── tsconfig.json
-│   ├── vite.config.ts
-│   ├── vitest.config.ts
-│   └── src/
-│       ├── __tests__/
-│       ├── app.ts
-│       ├── fuzzy.ts
-│       ├── keybindings.ts
-│       ├── language.ts
-│       ├── linting.ts
-│       ├── main.ts
-│       ├── modal.ts
-│       ├── native.ts
-│       ├── style.css
-│       ├── tabs.ts
-│       ├── theme-registry.ts
-│       ├── themes/
-│       │   ├── base.ts
-│       │   ├── dracula.ts
-│       │   ├── github-light.ts
-│       │   ├── monokai.ts
-│       │   ├── solarized-dark.ts
-│       │   ├── solarized-light.ts
-│       │   └── vscode-dark-plus.ts
-│       └── types.ts
-├── scripts/
-│   ├── build-dev.sh
-│   ├── embed-frontend.mjs
-│   ├── package-linux.sh
-│   ├── package-macos.sh
-│   └── package-windows.ps1
-├── src/
-│   ├── app.cpp
-│   ├── app.hpp
-│   ├── clipboard.hpp
-│   ├── clipboard_linux.cpp
-│   ├── clipboard_mac.mm
-│   ├── clipboard_win.cpp
-│   ├── frontend_bundle.hpp
-│   ├── main.cpp
-│   ├── snapshot.cpp
-│   └── snapshot.hpp
-└── tests/
-    ├── cpp/test_snapshot.cpp
-    └── test_repository_contract.py
-```
+Use [docs/release-checklist.md](docs/release-checklist.md) before tagging and publishing.

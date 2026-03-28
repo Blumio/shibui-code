@@ -47,14 +47,24 @@ function ensureFrontendBundle() {
   const frontendBundle = path.join(rootDir, "src", "frontend_bundle.hpp");
   const frontendProject = path.join(rootDir, "frontend", "package.json");
   const frontendModules = path.join(rootDir, "frontend", "node_modules");
+  const skipBuild = process.env.SHIBUI_SKIP_FRONTEND_BUILD === "1";
+  const forceBuild = process.env.SHIBUI_FORCE_FRONTEND_BUILD === "1";
 
-  if (!fs.existsSync(frontendProject)) {
-    console.error("frontend/package.json is missing.");
-    process.exit(1);
+  if (skipBuild) {
+    if (!fs.existsSync(frontendBundle)) {
+      console.error("SHIBUI_SKIP_FRONTEND_BUILD is set, but src/frontend_bundle.hpp is missing.");
+      process.exit(1);
+    }
+    return;
   }
 
-  if (process.env.SHIBUI_SKIP_FRONTEND_BUILD === "1" && fs.existsSync(frontendBundle)) {
+  if (fs.existsSync(frontendBundle) && !forceBuild) {
     return;
+  }
+
+  if (!fs.existsSync(frontendProject)) {
+    console.error("frontend/package.json is missing and src/frontend_bundle.hpp is unavailable.");
+    process.exit(1);
   }
 
   if (!fs.existsSync(frontendModules)) {
