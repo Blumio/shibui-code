@@ -25,7 +25,7 @@ bool SnapNativeMacWindow(void* native_window, const std::string& direction,
 
   NSRect target_frame = NSMakeRect(target.x, target.y, target.width, target.height);
   [NSAnimationContext runAnimationGroup:^(NSAnimationContext* context) {
-    context.duration = 0.12;
+    context.duration = 0.20;
     [[window animator] setFrame:target_frame display:YES];
   }
       completionHandler:nil];
