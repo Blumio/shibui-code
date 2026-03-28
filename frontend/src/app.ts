@@ -20,13 +20,11 @@ import {
 } from "./language";
 import {
   openHelpModal,
-  openMultilineInputModal,
   openSearchModal,
   openTextInputModal,
 } from "./modal";
 import { clearSnapshot, resizeWindow, syncSnapshot } from "./native";
 import { emptyPlaceholderExtension, normalizePlaceholderInput } from "./placeholder";
-import { applySessionCss } from "./session-styles";
 import {
   activeTab,
   activateTab,
@@ -293,22 +291,6 @@ export class ShibuiApp {
         },
       },
       {
-        key: "Mod-Shift-j",
-        preventDefault: true,
-        run: () => {
-          void this.openHighlightStyleImport();
-          return true;
-        },
-      },
-      {
-        key: "Mod-Shift-k",
-        preventDefault: true,
-        run: () => {
-          void this.openLintStyleImport();
-          return true;
-        },
-      },
-      {
         key: "Mod-Shift-y",
         preventDefault: true,
         run: () => this.toggleHighlighting(),
@@ -416,18 +398,6 @@ export class ShibuiApp {
     if (event.key.toLowerCase() === "h") {
       event.preventDefault();
       void this.openHelpWindow();
-      return;
-    }
-
-    if (event.shiftKey && event.key.toLowerCase() === "j") {
-      event.preventDefault();
-      void this.openHighlightStyleImport();
-      return;
-    }
-
-    if (event.shiftKey && event.key.toLowerCase() === "k") {
-      event.preventDefault();
-      void this.openLintStyleImport();
       return;
     }
 
@@ -960,46 +930,6 @@ export class ShibuiApp {
       toast.remove();
       this.toastTimerId = null;
     }, 1800);
-  }
-
-  private async openHighlightStyleImport(): Promise<void> {
-    if (this.modalOpen) {
-      return;
-    }
-
-    this.modalOpen = true;
-    const css = await openMultilineInputModal({
-      title: "Import Highlight Style (Session)",
-      placeholder:
-        "Type or paste CSS targeting CodeMirror token selectors. Example:\n.cm-keyword { color: #ff8c6a; }",
-    });
-    this.modalOpen = false;
-
-    if (css === null) {
-      return;
-    }
-
-    applySessionCss("highlight", css);
-  }
-
-  private async openLintStyleImport(): Promise<void> {
-    if (this.modalOpen) {
-      return;
-    }
-
-    this.modalOpen = true;
-    const css = await openMultilineInputModal({
-      title: "Import Lint Style (Session)",
-      placeholder:
-        "Type or paste CSS for lint visuals. Example:\n.cm-lintRange-error { text-decoration: underline 2px solid #ff3b30; }",
-    });
-    this.modalOpen = false;
-
-    if (css === null) {
-      return;
-    }
-
-    applySessionCss("lint", css);
   }
 
   private async sendSnapshot(): Promise<void> {
