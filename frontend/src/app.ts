@@ -23,7 +23,7 @@ import {
   openSearchModal,
   openTextInputModal,
 } from "./modal";
-import { clearSnapshot, resizeWindow, syncSnapshot } from "./native";
+import { clearSnapshot, copyText, resizeWindow, syncSnapshot } from "./native";
 import { emptyPlaceholderExtension, normalizePlaceholderInput } from "./placeholder";
 import {
   activeTab,
@@ -257,6 +257,14 @@ export class ShibuiApp {
         },
       },
       {
+        key: "Mod-r",
+        preventDefault: true,
+        run: () => {
+          this.renameTab(true);
+          return true;
+        },
+      },
+      {
         key: "Mod-t",
         preventDefault: true,
         run: () => {
@@ -289,12 +297,17 @@ export class ShibuiApp {
         },
       },
       {
-        key: "Mod-Shift-h",
+        key: "Mod-c",
+        preventDefault: true,
+        run: () => this.copySelectionToClipboard(),
+      },
+      {
+        key: "Mod-Shift-y",
         preventDefault: true,
         run: () => this.toggleHighlighting(),
       },
       {
-        key: "Mod-Shift-l",
+        key: "Mod-Shift-x",
         preventDefault: true,
         run: () => this.toggleDiagnostics(),
       },
@@ -381,6 +394,12 @@ export class ShibuiApp {
       return;
     }
 
+    if (event.key.toLowerCase() === "r") {
+      event.preventDefault();
+      this.renameTab(true);
+      return;
+    }
+
     if (event.key.toLowerCase() === "l") {
       event.preventDefault();
       void this.openLanguageSearch();
@@ -399,13 +418,13 @@ export class ShibuiApp {
       return;
     }
 
-    if (event.shiftKey && event.key.toLowerCase() === "h") {
+    if (event.shiftKey && event.key.toLowerCase() === "y") {
       event.preventDefault();
       this.toggleHighlighting();
       return;
     }
 
-    if (event.shiftKey && event.key.toLowerCase() === "l") {
+    if (event.shiftKey && event.key.toLowerCase() === "x") {
       event.preventDefault();
       this.toggleDiagnostics();
       return;
@@ -673,6 +692,14 @@ export class ShibuiApp {
     this.closeTabById(this.tabState.activeTabId, fromShortcut);
   }
 
+  private renameTab(fromShortcut = false): void {
+    if (fromShortcut) {
+      this.revealTabBarForShortcut();
+    }
+
+    this.startTabRename(this.tabState.activeTabId);
+  }
+
   private switchTabByNumber(oneBasedIndex: number): boolean {
     this.cancelTabRename();
     this.persistEditor();
@@ -860,9 +887,28 @@ export class ShibuiApp {
     });
   }
 
+  private copySelectionToClipboard(): boolean {
+    if (this.editor === null) {
+      return false;
+    }
+
+    const state = this.editor.state;
+    const selectedText = state.selection.ranges
+      .filter((range) => !range.empty)
+      .map((range) => state.sliceDoc(range.from, range.to))
+      .join("\n");
+
+    if (selectedText.length === 0) {
+      return true;
+    }
+
+    void copyText(selectedText).catch(() => undefined);
+    return true;
+  }
+
   private helpShortcuts(): Array<{ shortcut: string; description: string }> {
     return [
-      { shortcut: "Help", description: "Write code without distractions." },
+      { shortcut: "Help", description: "Write code without help or distractions." },
       { shortcut: "Cmd/Ctrl+N", description: "Create a new tab." },
       { shortcut: "Cmd/Ctrl+W", description: "Close the active tab." },
       { shortcut: "Cmd/Ctrl+R", description: "Rename active tab." },
@@ -870,8 +916,9 @@ export class ShibuiApp {
       { shortcut: "Cmd/Ctrl+L", description: "Open language selection." },
       { shortcut: "Cmd/Ctrl+P", description: "Configure empty-page placeholder text." },
       { shortcut: "Cmd/Ctrl+H", description: "Show this help window." },
-      { shortcut: "Cmd/Ctrl+Shift+H", description: "Toggle syntax highlighting." },
-      { shortcut: "Cmd/Ctrl+Shift+L", description: "Toggle lint diagnostics." },
+      { shortcut: "Cmd/Ctrl+C", description: "Copy selected editor text." },
+      { shortcut: "Cmd/Ctrl+Shift+Y", description: "Toggle syntax highlighting." },
+      { shortcut: "Cmd/Ctrl+Shift+X", description: "Toggle lint diagnostics." },
       { shortcut: "Cmd/Ctrl+1..9", description: "Switch to tab by index." },
       { shortcut: "Cmd/Ctrl+Left/Right", description: "Switch to previous/next tab." },
       { shortcut: "Info", description: "Tab contents are copied to clipboard upon closing this app." },

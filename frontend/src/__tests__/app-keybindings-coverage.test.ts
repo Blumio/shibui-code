@@ -11,10 +11,12 @@ type AppInternals = {
   editorKeyBindings: () => KeyBinding[];
   newTab: (fromShortcut?: boolean) => void;
   closeActiveTab: (fromShortcut?: boolean) => void;
+  renameTab: (fromShortcut?: boolean) => void;
   openThemeSearch: () => Promise<void>;
   openLanguageSearch: () => Promise<void>;
   openPlaceholderConfig: () => Promise<void>;
   openHelpWindow: () => Promise<void>;
+  copySelectionToClipboard: () => boolean;
   toggleHighlighting: () => boolean;
   toggleDiagnostics: () => boolean;
   switchTabByNumber: (oneBasedIndex: number) => boolean;
@@ -36,10 +38,12 @@ describe("app keybinding coverage", () => {
 
     const newTab = vi.fn();
     const closeActiveTab = vi.fn();
+    const renameTab = vi.fn();
     const openThemeSearch = vi.fn(async () => {});
     const openLanguageSearch = vi.fn(async () => {});
     const openPlaceholderConfig = vi.fn(async () => {});
     const openHelpWindow = vi.fn(async () => {});
+    const copySelectionToClipboard = vi.fn(() => true);
     const toggleHighlighting = vi.fn(() => true);
     const toggleDiagnostics = vi.fn(() => true);
     const switchTabByNumber = vi.fn(() => true);
@@ -48,10 +52,12 @@ describe("app keybinding coverage", () => {
 
     internals.newTab = newTab;
     internals.closeActiveTab = closeActiveTab;
+    internals.renameTab = renameTab;
     internals.openThemeSearch = openThemeSearch;
     internals.openLanguageSearch = openLanguageSearch;
     internals.openPlaceholderConfig = openPlaceholderConfig;
     internals.openHelpWindow = openHelpWindow;
+    internals.copySelectionToClipboard = copySelectionToClipboard;
     internals.toggleHighlighting = toggleHighlighting;
     internals.toggleDiagnostics = toggleDiagnostics;
     internals.switchTabByNumber = switchTabByNumber;
@@ -63,12 +69,14 @@ describe("app keybinding coverage", () => {
 
     expect(run("Mod-n")).toBe(true);
     expect(run("Mod-w")).toBe(true);
+    expect(run("Mod-r")).toBe(true);
     expect(run("Mod-t")).toBe(true);
     expect(run("Mod-l")).toBe(true);
     expect(run("Mod-p")).toBe(true);
     expect(run("Mod-h")).toBe(true);
-    expect(run("Mod-Shift-h")).toBe(true);
-    expect(run("Mod-Shift-l")).toBe(true);
+    expect(run("Mod-c")).toBe(true);
+    expect(run("Mod-Shift-y")).toBe(true);
+    expect(run("Mod-Shift-x")).toBe(true);
     expect(run("Mod-1")).toBe(true);
     expect(run("Mod-2")).toBe(true);
     expect(run("Mod-3")).toBe(true);
@@ -83,10 +91,12 @@ describe("app keybinding coverage", () => {
 
     expect(newTab).toHaveBeenCalledWith(true);
     expect(closeActiveTab).toHaveBeenCalledWith(true);
+    expect(renameTab).toHaveBeenCalledWith(true);
     expect(openThemeSearch).toHaveBeenCalledTimes(1);
     expect(openLanguageSearch).toHaveBeenCalledTimes(1);
     expect(openPlaceholderConfig).toHaveBeenCalledTimes(1);
     expect(openHelpWindow).toHaveBeenCalledTimes(1);
+    expect(copySelectionToClipboard).toHaveBeenCalledTimes(1);
     expect(toggleHighlighting).toHaveBeenCalledTimes(1);
     expect(toggleDiagnostics).toHaveBeenCalledTimes(1);
     expect(switchTabByNumber).toHaveBeenNthCalledWith(1, 1);

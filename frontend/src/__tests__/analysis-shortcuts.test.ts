@@ -14,7 +14,8 @@ describe("analysis shortcuts", () => {
       .filter((key): key is string => typeof key === "string");
 
     expect(keys.includes("Mod-z")).toBe(false);
-    expect(keys.includes("Mod-Shift-h")).toBe(true);
-    expect(keys.includes("Mod-Shift-l")).toBe(true);
+    expect(keys.includes("Mod-c")).toBe(true);
+    expect(keys.includes("Mod-Shift-y")).toBe(true);
+    expect(keys.includes("Mod-Shift-x")).toBe(true);
   });
 });

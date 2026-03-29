@@ -144,6 +144,11 @@ void App::BindNativeApi() {
     ResizeWindow(DecodeBoundRequestPayload(req));
     return std::string("true");
   });
+
+  window_.bind("copy_text", [this](const std::string& req) {
+    const bool copied = clipboard_.Copy(DecodeBoundRequestPayload(req));
+    return copied ? std::string("true") : std::string("false");
+  });
 }
 
 int App::Run() {
