@@ -63,12 +63,12 @@ describe("app keybinding coverage", () => {
 
     expect(run("Mod-n")).toBe(true);
     expect(run("Mod-w")).toBe(true);
-    expect(run("Mod-s")).toBe(true);
+    expect(run("Mod-t")).toBe(true);
     expect(run("Mod-l")).toBe(true);
     expect(run("Mod-p")).toBe(true);
     expect(run("Mod-h")).toBe(true);
-    expect(run("Mod-Shift-y")).toBe(true);
-    expect(run("Mod-Shift-u")).toBe(true);
+    expect(run("Mod-Shift-h")).toBe(true);
+    expect(run("Mod-Shift-l")).toBe(true);
     expect(run("Mod-1")).toBe(true);
     expect(run("Mod-2")).toBe(true);
     expect(run("Mod-3")).toBe(true);
