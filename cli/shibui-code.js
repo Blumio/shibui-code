@@ -9,7 +9,11 @@ import { resolveBinaryPath } from "./scripts/detect-platform.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.resolve(__dirname, "..");
-const binaryPath = resolveBinaryPath(rootDir);
+if (process.platform !== "darwin") {
+  console.error(`Unsupported platform: ${process.platform}. Shibui-Code is macOS-only.`);
+  process.exit(1);
+}
+const binaryPath = resolveBinaryPath(rootDir, "darwin", process.arch);
 
 function runBuildIfNeeded() {
   if (fs.existsSync(binaryPath)) {

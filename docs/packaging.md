@@ -1,14 +1,6 @@
 # Packaging
 
-Shibui-Code uses CPack with platform-specific generators.
-
-## Linux
-
-```bash
-npm run package:linux
-```
-
-Outputs in build folder and root packaging output depending on generator (`.tgz`, `.deb`).
+Shibui-Code uses CPack for macOS packages.
 
 ## macOS
 
@@ -20,14 +12,6 @@ Generates:
 - A styled drag-and-drop `.dmg` (custom background, app icon placement, Applications shortcut).
 - A `.tgz` archive via CPack.
 
-## Windows
-
-```powershell
-npm run package:windows
-```
-
-Generates `.zip` / NSIS installer (`.exe`) when NSIS is available.
-
 ## CI artifacts
 
-GitHub Actions workflow `.github/workflows/ci.yml` builds and uploads artifacts for Linux, macOS, and Windows on every push/PR.
+GitHub Actions workflow `.github/workflows/ci.yml` builds and uploads macOS artifacts on every push/PR.

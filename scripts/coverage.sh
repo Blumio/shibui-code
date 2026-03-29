@@ -4,7 +4,7 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 COVERAGE_DIR="$ROOT_DIR/coverage"
 NATIVE_BUILD_DIR="$ROOT_DIR/build-coverage"
-PLATFORM_ID="$(node -p "process.platform + '-' + process.arch")"
+PLATFORM_ID="darwin-$(node -p "process.arch")"
 
 if ! command -v cmake >/dev/null 2>&1; then
   echo "cmake is required but was not found."

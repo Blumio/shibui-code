@@ -1,11 +1,10 @@
 # Shibui-Code Architecture
 
-Shibui-Code is a cross-platform desktop app built from two layers:
+Shibui-Code is a macOS desktop app built from two layers:
 
-1. **Native shell (C++ + GTK-compatible runtime)**
+1. **Native shell (C++ + Cocoa runtime)**
 - Uses [`webview`](https://github.com/webview/webview) from C++.
-- Linux backend uses GTK/WebKit.
-- macOS and Windows use native webview implementations.
+- Uses the macOS-native backend.
 - Native layer receives editor snapshots and copies them to the system clipboard when the app closes.
 
 2. **Editor frontend (TypeScript + CodeMirror 6)**

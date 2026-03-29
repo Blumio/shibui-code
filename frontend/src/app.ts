@@ -96,8 +96,6 @@ export class ShibuiApp {
 
   private toastTimerId: number | null = null;
 
-  private readonly isMac = navigator.platform.toLowerCase().includes("mac");
-
   constructor(root: HTMLElement) {
     this.root = root;
 
@@ -354,7 +352,7 @@ export class ShibuiApp {
       return;
     }
 
-    const resizeDirection = resizeDirectionShortcut(event, this.isMac);
+    const resizeDirection = resizeDirectionShortcut(event);
     if (resizeDirection !== null) {
       event.preventDefault();
       void resizeWindow(resizeDirection);

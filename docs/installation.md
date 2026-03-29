@@ -7,23 +7,9 @@
 - C++20 compiler
 - Python 3.10+ (for `pytest` checks)
 
-### Linux extra packages
-
-Ubuntu/Debian:
-
-```bash
-sudo apt-get update
-sudo apt-get install -y build-essential cmake pkg-config libgtk-3-dev libwebkit2gtk-4.1-dev
-```
-
 ### macOS
 
 Install Xcode command line tools and Homebrew dependencies used by your compiler toolchain.
-
-### Windows
-
-- Visual Studio 2022 Build Tools with C++ workload
-- CMake in PATH
 
 ## Global CLI install
 
@@ -50,5 +36,5 @@ node cli/scripts/build-native.js
 Run:
 
 ```bash
-./dist/bin/$(node -p "process.platform + '-' + process.arch")/$(node -p "process.platform==='win32'?'shibui-code.exe':'shibui-code'")
+./dist/bin/darwin-$(node -p "process.arch")/shibui-code
 ```

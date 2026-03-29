@@ -1,11 +1,11 @@
 # Shibui-Code Dev Diary
 
 ## Project Goal
-Build a distraction-free, cross-platform desktop code scribbling app with syntax highlighting and static diagnostics, no file I/O, and global CLI launch support.
+Build a distraction-free macOS desktop code scribbling app with syntax highlighting and static diagnostics, no file I/O, and global CLI launch support.
 
 ## Build Journey
 1. **Initial architecture selection**
-- Native shell in C++ using `webview` (GTK/WebKit backend on Linux, native backends on macOS/Windows).
+- Native shell in C++ using `webview` with the macOS native backend.
 - Editor frontend in TypeScript using CodeMirror 6.
 - Build + packaging via CMake/CPack.
 - Global install/launch via npm (`shibui-code`).
@@ -55,7 +55,7 @@ Build a distraction-free, cross-platform desktop code scribbling app with syntax
 A working Docker image (`shibui-code:local`) was built and the GUI launched successfully through XQuartz, confirming end-to-end functionality of the current prototype.
 
 ## Current Prototype Characteristics
-- Cross-platform-oriented architecture (C++ + webview + CodeMirror frontend).
+- macOS-focused architecture (C++ + webview + CodeMirror frontend).
 - Temporary in-memory tabs only.
 - Syntax highlighting across required languages.
 - Static diagnostics (syntax errors + warning markers).

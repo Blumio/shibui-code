@@ -20,8 +20,8 @@ export function shouldHandleGlobalShortcut(event: KeyboardEvent): boolean {
 
 export type ResizeDirection = "up" | "down" | "left" | "right";
 
-export function resizeDirectionShortcut(event: KeyboardEvent, isMac: boolean): ResizeDirection | null {
-  if (!isMac || !event.ctrlKey || event.metaKey) {
+export function resizeDirectionShortcut(event: KeyboardEvent): ResizeDirection | null {
+  if (!event.ctrlKey || event.metaKey) {
     return null;
   }
 

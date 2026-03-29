@@ -24,13 +24,13 @@ describe("keybindings", () => {
     expect(shortcutDigit(keyboardEvent("a", true, false))).toBeNull();
   });
 
-  it("maps mac resize shortcuts", () => {
-    expect(resizeDirectionShortcut(keyboardEvent("PageUp", true, false), true)).toBe("up");
-    expect(resizeDirectionShortcut(keyboardEvent("PageDown", true, false), true)).toBe("down");
-    expect(resizeDirectionShortcut(keyboardEvent("Home", true, false), true)).toBe("left");
-    expect(resizeDirectionShortcut(keyboardEvent("End", true, false), true)).toBe("right");
-    expect(resizeDirectionShortcut(keyboardEvent("PageUp", false, false), true)).toBeNull();
-    expect(resizeDirectionShortcut(keyboardEvent("PageUp", true, false), false)).toBeNull();
+  it("maps resize shortcuts", () => {
+    expect(resizeDirectionShortcut(keyboardEvent("PageUp", true, false))).toBe("up");
+    expect(resizeDirectionShortcut(keyboardEvent("PageDown", true, false))).toBe("down");
+    expect(resizeDirectionShortcut(keyboardEvent("Home", true, false))).toBe("left");
+    expect(resizeDirectionShortcut(keyboardEvent("End", true, false))).toBe("right");
+    expect(resizeDirectionShortcut(keyboardEvent("PageUp", false, false))).toBeNull();
+    expect(resizeDirectionShortcut(keyboardEvent("PageUp", true, true))).toBeNull();
   });
 
   it("skips global handling when event is already handled", () => {

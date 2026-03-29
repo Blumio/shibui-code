@@ -1,6 +1,6 @@
 # Shibui-Code
 
-Shibui-Code is a distraction-free desktop code scribbling app for deliberate coding practice.
+Shibui-Code is a distraction-free macOS code scribbling app for deliberate coding practice.
 
 ![Shibui-Code icon](assets/icons/shibui-code.png)
 
@@ -17,10 +17,10 @@ Most editors optimize for large projects and productivity workflows. Shibui-Code
 
 ## Why it is technically interesting
 
-- Native desktop host in C++20 with platform webview backends
+- Native desktop host in C++20 with macOS webview backend
 - Embedded CodeMirror 6 frontend bundled into a native header
 - Strict no-persistence runtime constraints
-- Cross-platform packaging via CMake + CPack
+- macOS packaging via CMake + CPack
 
 ## Install
 
@@ -110,14 +110,12 @@ npm test
 ## Packaging
 
 ```bash
-npm run package:linux
 npm run package:macos
-npm run package:windows
 ```
 
 ## Roadmap
 
-- Add cross-platform install smoke tests in CI
+- Add macOS clean-machine install smoke tests in CI
 - Publish reproducible release notes per version
 - Expand theme packs while keeping startup fast
 - Tighten native error reporting for missing runtime deps

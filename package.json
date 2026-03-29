@@ -1,7 +1,7 @@
 {
   "name": "shibui-code",
   "version": "1.0.0",
-  "description": "Distraction-free code scribbling desktop editor built with C++, GTK and CodeMirror 6.",
+  "description": "Distraction-free code scribbling desktop editor for macOS built with C++ and CodeMirror 6.",
   "type": "module",
   "author": "Blumio",
   "license": "MIT",
@@ -30,13 +30,11 @@
     "typecheck": "npm --prefix frontend run typecheck",
     "lint": "npm run typecheck",
     "test:frontend": "npm --prefix frontend run test",
-    "test:native": "node cli/scripts/build-native.js --with-tests && ctest --test-dir .native-build/$(node -p \"process.platform + '-' + process.arch\") --output-on-failure",
+    "test:native": "node cli/scripts/build-native.js --with-tests && ctest --test-dir .native-build/darwin-$(node -p \"process.arch\") --output-on-failure",
     "test:python": "python3 -m pytest -q",
     "test": "npm run test:frontend && npm run test:native && npm run test:python",
     "pack:dry-run": "npm pack --dry-run",
-    "package:linux": "bash scripts/package-linux.sh",
     "package:macos": "bash scripts/package-macos.sh",
-    "package:windows": "powershell -ExecutionPolicy Bypass -File scripts/package-windows.ps1",
     "coverage": "bash scripts/coverage.sh"
   },
   "engines": {
@@ -61,7 +59,7 @@
     "desktop",
     "editor",
     "codemirror",
-    "gtk",
-    "cpp"
+    "cpp",
+    "macos"
   ]
 }

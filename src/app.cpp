@@ -8,9 +8,7 @@
 #include "frontend_bundle.hpp"
 #include "snapshot.hpp"
 #include "window_snap.hpp"
-#if defined(__APPLE__)
 #include "window_snap_mac.hpp"
-#endif
 
 namespace {
 
@@ -171,7 +169,6 @@ void App::ResizeWindow(const std::string& direction) {
     return;
   }
 
-#if defined(__APPLE__)
   auto native_window = window_.window();
   if (native_window.has_value()) {
     if (SnapNativeMacWindow(native_window.value(), direction, window_width_,
@@ -179,7 +176,6 @@ void App::ResizeWindow(const std::string& direction) {
       return;
     }
   }
-#endif
 
   constexpr int kStep = 90;
   constexpr int kMinWidth = 780;
