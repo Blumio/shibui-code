@@ -18,9 +18,10 @@ Most editors optimize for large projects and productivity workflows. Shibui-Code
 ## Why it is technically interesting
 
 - Native desktop host in C++20 with macOS webview backend
-- Embedded CodeMirror 6 frontend bundled into a native header
+- C++ core extracted into a reusable/testable library
+- Embedded TypeScript/CodeMirror 6 frontend bundled into a native header
 - Strict no-persistence runtime constraints
-- macOS packaging via CMake + CPack
+- Unified build/test/packaging entrypoint via CMake + Ninja + CTest
 
 ## Install
 
@@ -57,7 +58,7 @@ See [examples/hello-world/README.md](examples/hello-world/README.md) for a minim
 
 - Multi-tab temporary editor sessions
 - Language selection for common programming languages
-- Theme search mode (`Ctrl+S`) with fuzzy matching
+- Theme search mode (`Ctrl+T`) with fuzzy matching
 - Static diagnostics (syntax errors, trailing whitespace, long lines)
 - Clipboard snapshot export on app close
 - No telemetry, plugins, cloud sync, or hidden background services
@@ -66,18 +67,22 @@ See [examples/hello-world/README.md](examples/hello-world/README.md) for a minim
 
 - `Ctrl+N`: new tab
 - `Ctrl+W`: close tab
-- `Ctrl+S`: open theme search mode
+- `Ctrl+T`: open theme search mode
 - `Ctrl+L`: open language selector
 - `Ctrl+1..9`: switch tabs
 
 ## Architecture and design choices
 
-- Native shell: C++20 + webview
-- Frontend: TypeScript + CodeMirror 6
-- Build/package: CMake + CPack
-- CLI distribution: npm package with `shibui-code` bin
+- Build/test orchestrator: CMake presets + Ninja + CTest
+- Core backend: C++ static library in `backend/`
+- App wrapper: thin native shell in `app/`
+- Frontend: TypeScript + CodeMirror 6 in `frontend/`
+- Bridge boundary: versioned/typed contract validated in C++ and TS tests
+- Test layers: GoogleTest/gMock, Vitest, Playwright, pytest integration contracts
 
 Details:
+- [docs/architecture.md](docs/architecture.md)
+- [docs/coverage.md](docs/coverage.md)
 - [docs/packaging.md](docs/packaging.md)
 
 ## Tradeoffs and limitations
@@ -95,29 +100,30 @@ This app is not meant as a full IDE and is intentionally kept bare bones for max
 ## Local development
 
 ```bash
-npm --prefix frontend install
-npm run build:frontend
-npm run build
+cmake --preset dev
+cmake --build --preset dev
+ctest --preset dev --output-on-failure
 ```
 
 ## Quality checks
 
 ```bash
-npm run lint
-npm test
+ctest --preset ci --output-on-failure
+bash scripts/coverage.sh
+bash scripts/security.sh
 ```
 
 ## Packaging
 
 ```bash
-npm run package:macos
+bash scripts/package-macos.sh
 ```
 
 ## Roadmap
 
-- Add macOS clean-machine install smoke tests in CI
+- Add richer bridge contract fixtures and golden serialization tests
+- Expand smoke coverage against signed app bundles
 - Publish reproducible release notes per version
-- Expand theme packs while keeping startup fast
 - Tighten native error reporting for missing runtime deps
 
 ## Security and contribution

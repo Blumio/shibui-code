@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { clearSnapshot, copyText, resizeWindow, syncSnapshot } from "../native";
+import { clearSnapshot, copyText, pasteText, resizeWindow, syncSnapshot } from "../native";
 
 describe("native bridge", () => {
   beforeEach(() => {
@@ -8,6 +8,7 @@ describe("native bridge", () => {
     delete (window as unknown as { clear_snapshot?: unknown }).clear_snapshot;
     delete (window as unknown as { resize_window?: unknown }).resize_window;
     delete (window as unknown as { copy_text?: unknown }).copy_text;
+    delete (window as unknown as { paste_text?: unknown }).paste_text;
   });
 
   it("no-ops when sync bridge is absent", async () => {
@@ -52,5 +53,24 @@ describe("native bridge", () => {
     await copyText("hello");
 
     expect(writeText).toHaveBeenCalledWith("hello");
+  });
+
+  it("calls paste bridge when present", async () => {
+    const fn = vi.fn().mockResolvedValue("hello");
+    (window as unknown as { paste_text: () => Promise<string> }).paste_text = fn;
+
+    await expect(pasteText()).resolves.toBe("hello");
+    expect(fn).toHaveBeenCalled();
+  });
+
+  it("falls back to browser clipboard read when paste bridge is absent", async () => {
+    const readText = vi.fn().mockResolvedValue("world");
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: { readText },
+    });
+
+    await expect(pasteText()).resolves.toBe("world");
+    expect(readText).toHaveBeenCalled();
   });
 });

@@ -1,33 +1,55 @@
 # Shibui-Code Architecture
 
-Shibui-Code is a macOS desktop app built from two layers:
+Shibui-Code is a macOS desktop app with a strict split between core logic, native shell, and UI.
 
-1. **Native shell (C++ + Cocoa runtime)**
-- Uses [`webview`](https://github.com/webview/webview) from C++.
-- Uses the macOS-native backend.
-- Native layer receives editor snapshots and copies them to the system clipboard when the app closes.
+## Layers
 
-2. **Editor frontend (TypeScript + CodeMirror 6)**
-- Runs fully local inside the embedded webview.
-- Manages temporary tabs, language mode switching, themes, keyboard shortcuts, and lint diagnostics.
-- Does not read/write files or persist session state.
+1. **Backend core (`backend/`)**
+- C++20 static library (`shibui_core`).
+- Owns snapshot normalization, window snap geometry logic, and bridge contract parsing.
+- Tested with GoogleTest/gMock.
+
+2. **Native app shell (`app/`)**
+- Cocoa/webview wrapper around the backend core.
+- Binds the approved bridge operations and delegates logic to `shibui_core`.
+- Owns clipboard and native window APIs.
+
+3. **Frontend (`frontend/`)**
+- TypeScript + CodeMirror 6 UI.
+- Sends only typed bridge calls (`sync_snapshot`, `clear_snapshot`, `resize_window`, `copy_text`, `paste_text`).
+- No persistence APIs and no direct privileged operations.
 
 ## Data Flow
 
-- User edits code in CodeMirror tab.
-- Frontend serializes session content and sends it to native `sync_snapshot` bridge.
-- Native stores latest snapshot in memory only.
-- On process exit, native writes snapshot to clipboard and clears memory.
+- User edits code in frontend tabs.
+- Frontend serializes session text and sends it through `sync_snapshot`.
+- Backend contract parser validates operation + payload.
+- Native shell stores latest normalized snapshot in-memory only.
+- On close, native shell copies snapshot to system clipboard and clears memory.
 
-## Security / Constraint Model
+## Bridge Contract Rules
 
-- No project file browsing, save/load, or persistence APIs.
-- No analytics or telemetry.
-- No auto-update or plugin model.
-- No AI/completion/refactoring services.
+- Fixed operation allowlist.
+- Payload parsing/validation per operation.
+- Explicit direction validation for `resize_window`.
+- Unsupported operations and malformed payloads are rejected.
+
+## Build/Test Orchestration
+
+- CMake presets are the single source of configure/build settings.
+- CTest is the unified runner for backend, frontend, integration, and e2e tests.
+- Test labels: `backend`, `frontend`, `integration`, `unit`, `contract`, `e2e`.
 
 ## Testing Strategy
 
-- TypeScript unit tests (Vitest) for frontend state logic, keybindings, filtering, themes, lint helpers, and bridge behavior.
-- C++ unit tests (CTest) for snapshot normalization.
-- Python repository contract tests (pytest) to assert required files/sections/language coverage.
+- **Backend unit + contract:** GoogleTest/gMock (`backend/tests`).
+- **Frontend unit + contract:** Vitest (`frontend/src/__tests__`).
+- **Frontend e2e flows:** Playwright (`frontend/tests/e2e`).
+- **Repository integration contracts:** pytest (`tests/integration`).
+
+## Security Model
+
+- Frontend input is treated as untrusted.
+- Native bridge has a narrow command surface and explicit validation.
+- Sanitizer presets (`asan`, `ubsan`, optional `tsan`) are part of the workflow.
+- CodeQL runs for C++ and JS/TS in CI.

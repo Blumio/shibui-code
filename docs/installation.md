@@ -28,13 +28,12 @@ If the native binary is missing, CLI auto-builds it during install/first launch.
 ## Local dev install
 
 ```bash
-npm --prefix frontend install
-npm run build:frontend
-node cli/scripts/build-native.js
+cmake --preset dev
+cmake --build --preset dev
 ```
 
 Run:
 
 ```bash
-./dist/bin/darwin-$(node -p "process.arch")/shibui-code
+./build/dev/app/shibui-code.app/Contents/MacOS/shibui-code
 ```

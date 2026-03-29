@@ -9,7 +9,7 @@ type KeyBinding = {
 };
 
 type EditorLike = {
-  state: { doc: { length: number } };
+  state: { doc: { length: number; toString: () => string } };
   dispatch: (spec: {
     changes?: { from: number; to: number; insert: string };
     selection?: { anchor: number; head?: number };
@@ -80,5 +80,36 @@ describe("copy shortcut", () => {
     const run = bindingByKey(internals.editorKeyBindings(), "Mod-c").run;
     expect(run?.()).toBe(true);
     expect(copySpy).not.toHaveBeenCalled();
+  });
+
+  it("pastes clipboard text via Mod-v", async () => {
+    const root = document.createElement("div");
+    document.body.appendChild(root);
+    const app = new ShibuiApp(root);
+    await app.initialize();
+
+    const internals = app as unknown as AppInternals;
+    if (internals.editor === null) {
+      throw new Error("Expected editor to be initialized");
+    }
+    const editor = internals.editor;
+
+    editor.dispatch({
+      changes: {
+        from: 0,
+        to: editor.state.doc.length,
+        insert: "alpha",
+      },
+    });
+    editor.dispatch({ selection: { anchor: 5 } });
+
+    const pasteSpy = vi.spyOn(nativeBridge, "pasteText").mockResolvedValue(" beta");
+
+    const run = bindingByKey(internals.editorKeyBindings(), "Mod-v").run;
+    expect(run?.()).toBe(true);
+    await vi.waitFor(() => {
+      expect(pasteSpy).toHaveBeenCalled();
+      expect(editor.state.doc.toString()).toBe("alpha beta");
+    });
   });
 });

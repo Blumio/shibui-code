@@ -1,72 +1,57 @@
 cmake_minimum_required(VERSION 3.24)
-project(ShibuiCode VERSION 1.0.0 LANGUAGES CXX)
+project(ShibuiCode VERSION 1.0.0 LANGUAGES CXX OBJCXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-option(SHIBUI_BUILD_TESTS "Build unit tests" ON)
+include(CTest)
+
+option(SHIBUI_BUILD_TESTS "Build and register tests" ON)
+option(SHIBUI_ENABLE_COVERAGE "Enable coverage instrumentation for C++ targets" OFF)
+set(SHIBUI_SANITIZER "none" CACHE STRING "Sanitizer to enable: none,address,undefined,thread")
+set_property(CACHE SHIBUI_SANITIZER PROPERTY STRINGS none address undefined thread)
 
 if(NOT APPLE)
   message(FATAL_ERROR "Shibui-Code currently supports only macOS.")
 endif()
 
-if(NOT EXISTS "${CMAKE_SOURCE_DIR}/src/frontend_bundle.hpp")
-  message(FATAL_ERROR "src/frontend_bundle.hpp is missing. Run: npm run build:frontend")
+find_program(NPM_EXECUTABLE npm REQUIRED)
+find_program(NODE_EXECUTABLE node REQUIRED)
+find_program(PYTHON3_EXECUTABLE python3 REQUIRED)
+
+add_library(shibui_compile_options INTERFACE)
+target_compile_features(shibui_compile_options INTERFACE cxx_std_20)
+
+if(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
+  target_compile_options(shibui_compile_options INTERFACE -Wall -Wextra -Wpedantic)
 endif()
 
-include(FetchContent)
-
-FetchContent_Declare(
-  webview
-  GIT_REPOSITORY https://github.com/webview/webview.git
-  GIT_TAG 0.12.0
-)
-FetchContent_MakeAvailable(webview)
-
-set(SHIBUI_SOURCES
-  src/main.cpp
-  src/app.cpp
-  src/snapshot.cpp
-  src/window_snap.cpp
-  src/clipboard_mac.mm
-  src/window_snap_mac.mm
-)
-
-set(APP_ICON_MACOS "${CMAKE_SOURCE_DIR}/assets/icons/shibui-code.icns")
-set_source_files_properties(${APP_ICON_MACOS} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
-add_executable(shibui-code MACOSX_BUNDLE ${SHIBUI_SOURCES} ${APP_ICON_MACOS})
-set_target_properties(shibui-code PROPERTIES MACOSX_BUNDLE_ICON_FILE "shibui-code.icns")
-
-target_include_directories(shibui-code PRIVATE src)
-if(TARGET webview::core)
-  target_link_libraries(shibui-code PRIVATE webview::core)
-elseif(TARGET webview::webview)
-  target_link_libraries(shibui-code PRIVATE webview::webview)
-elseif(TARGET webview)
-  target_link_libraries(shibui-code PRIVATE webview)
-else()
-  message(FATAL_ERROR "Webview target not found after FetchContent.")
+if(SHIBUI_ENABLE_COVERAGE)
+  target_compile_options(shibui_compile_options INTERFACE --coverage -O0 -g)
+  target_link_options(shibui_compile_options INTERFACE --coverage)
 endif()
 
-target_link_libraries(shibui-code PRIVATE "-framework Cocoa")
+if(SHIBUI_SANITIZER STREQUAL "address")
+  target_compile_options(shibui_compile_options INTERFACE -fsanitize=address -fno-omit-frame-pointer)
+  target_link_options(shibui_compile_options INTERFACE -fsanitize=address)
+elseif(SHIBUI_SANITIZER STREQUAL "undefined")
+  target_compile_options(shibui_compile_options INTERFACE -fsanitize=undefined -fno-omit-frame-pointer)
+  target_link_options(shibui_compile_options INTERFACE -fsanitize=undefined)
+elseif(SHIBUI_SANITIZER STREQUAL "thread")
+  target_compile_options(shibui_compile_options INTERFACE -fsanitize=thread -fno-omit-frame-pointer)
+  target_link_options(shibui_compile_options INTERFACE -fsanitize=thread)
+elseif(NOT SHIBUI_SANITIZER STREQUAL "none")
+  message(FATAL_ERROR "Unsupported SHIBUI_SANITIZER value: ${SHIBUI_SANITIZER}")
+endif()
 
-if(SHIBUI_BUILD_TESTS)
+add_subdirectory(backend)
+add_subdirectory(app)
+
+if(SHIBUI_BUILD_TESTS AND BUILD_TESTING)
   enable_testing()
-  add_executable(shibui-unit-tests
-    tests/cpp/test_snapshot.cpp
-    tests/cpp/test_window_snap.cpp
-    src/snapshot.cpp
-    src/window_snap.cpp
-  )
-  target_include_directories(shibui-unit-tests PRIVATE src)
-  add_test(NAME shibui-unit-tests COMMAND shibui-unit-tests)
+  add_subdirectory(tests)
 endif()
-
-install(TARGETS shibui-code
-  RUNTIME DESTINATION bin
-  BUNDLE DESTINATION .
-)
 
 set(CPACK_PACKAGE_NAME "Shibui-Code")
 set(CPACK_PACKAGE_VENDOR "Shibui")

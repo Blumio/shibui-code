@@ -8,7 +8,19 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.resolve(__dirname, "..");
 const distDir = path.join(rootDir, "frontend", "dist");
 const indexPath = path.join(distDir, "index.html");
-const outputPath = path.join(rootDir, "src", "frontend_bundle.hpp");
+
+function resolveOutputPath() {
+  const outputArgIndex = process.argv.indexOf("--output");
+  if (outputArgIndex !== -1) {
+    const providedPath = process.argv[outputArgIndex + 1];
+    if (providedPath === undefined || providedPath.startsWith("--")) {
+      throw new Error("--output requires a file path argument");
+    }
+    return path.resolve(rootDir, providedPath);
+  }
+
+  return path.join(rootDir, "app", "generated", "frontend_bundle.hpp");
+}
 
 function readFile(filePath) {
   if (!fs.existsSync(filePath)) {
@@ -70,6 +82,8 @@ const jsContent = readFile(path.join(distDir, jsAssetPath.replace(/^\//, "")));
 
 const inlineHtml = buildInlineHtml(indexHtml, cssContent, jsContent);
 const header = toHeader(inlineHtml);
+const outputPath = resolveOutputPath();
+fs.mkdirSync(path.dirname(outputPath), { recursive: true });
 fs.writeFileSync(outputPath, header, "utf8");
 
 console.log(`Generated ${outputPath}`);

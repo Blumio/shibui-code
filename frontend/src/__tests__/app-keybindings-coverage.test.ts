@@ -17,6 +17,7 @@ type AppInternals = {
   openPlaceholderConfig: () => Promise<void>;
   openHelpWindow: () => Promise<void>;
   copySelectionToClipboard: () => boolean;
+  pasteClipboardToEditor: () => boolean;
   toggleHighlighting: () => boolean;
   toggleDiagnostics: () => boolean;
   switchTabByNumber: (oneBasedIndex: number) => boolean;
@@ -44,6 +45,7 @@ describe("app keybinding coverage", () => {
     const openPlaceholderConfig = vi.fn(async () => {});
     const openHelpWindow = vi.fn(async () => {});
     const copySelectionToClipboard = vi.fn(() => true);
+    const pasteClipboardToEditor = vi.fn(() => true);
     const toggleHighlighting = vi.fn(() => true);
     const toggleDiagnostics = vi.fn(() => true);
     const switchTabByNumber = vi.fn(() => true);
@@ -58,6 +60,7 @@ describe("app keybinding coverage", () => {
     internals.openPlaceholderConfig = openPlaceholderConfig;
     internals.openHelpWindow = openHelpWindow;
     internals.copySelectionToClipboard = copySelectionToClipboard;
+    internals.pasteClipboardToEditor = pasteClipboardToEditor;
     internals.toggleHighlighting = toggleHighlighting;
     internals.toggleDiagnostics = toggleDiagnostics;
     internals.switchTabByNumber = switchTabByNumber;
@@ -75,6 +78,7 @@ describe("app keybinding coverage", () => {
     expect(run("Mod-p")).toBe(true);
     expect(run("Mod-h")).toBe(true);
     expect(run("Mod-c")).toBe(true);
+    expect(run("Mod-v")).toBe(true);
     expect(run("Mod-Shift-y")).toBe(true);
     expect(run("Mod-Shift-x")).toBe(true);
     expect(run("Mod-1")).toBe(true);
@@ -97,6 +101,7 @@ describe("app keybinding coverage", () => {
     expect(openPlaceholderConfig).toHaveBeenCalledTimes(1);
     expect(openHelpWindow).toHaveBeenCalledTimes(1);
     expect(copySelectionToClipboard).toHaveBeenCalledTimes(1);
+    expect(pasteClipboardToEditor).toHaveBeenCalledTimes(1);
     expect(toggleHighlighting).toHaveBeenCalledTimes(1);
     expect(toggleDiagnostics).toHaveBeenCalledTimes(1);
     expect(switchTabByNumber).toHaveBeenNthCalledWith(1, 1);

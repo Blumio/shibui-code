@@ -1,17 +1,40 @@
 # Packaging
 
-Shibui-Code uses CPack for macOS packages.
+Shibui-Code uses CPack for macOS distribution artifacts.
 
-## macOS
+## Build/package command
 
 ```bash
-npm run package:macos
+bash scripts/package-macos.sh
 ```
 
-Generates:
-- A styled drag-and-drop `.dmg` (custom background, app icon placement, Applications shortcut).
-- A `.tgz` archive via CPack.
+The script uses CMake preset `release`, runs CTest, and then runs CPack.
+
+## Outputs
+
+- Drag-and-drop `.dmg`
+- `.tar.gz` archive
+
+## Signing and notarization
+
+The packaging script supports command-line signing/notarization without Xcode UI.
+
+### Enable signing (Hardened Runtime)
+
+Set:
+
+- `SHIBUI_MACOS_SIGN_IDENTITY`
+
+### Enable notarization
+
+Set all three:
+
+- `SHIBUI_NOTARY_APPLE_ID`
+- `SHIBUI_NOTARY_TEAM_ID`
+- `SHIBUI_NOTARY_PASSWORD`
+
+When enabled, the script submits the DMG with `notarytool` and staples it.
 
 ## CI artifacts
 
-GitHub Actions workflow `.github/workflows/ci.yml` builds and uploads macOS artifacts on every push/PR.
+`.github/workflows/ci.yml` builds and uploads macOS artifacts for every push/PR.

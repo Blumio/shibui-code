@@ -7,20 +7,28 @@ Use this checklist before creating a GitHub release and publishing to npm.
 - [ ] Confirm the release scope is intentional and user-facing value is clear.
 - [ ] Update `README.md` if behavior or setup changed.
 - [ ] Update `CHANGELOG.md` with version/date and notable entries.
-- [ ] Update architecture/packaging docs if relevant.
+- [ ] Update architecture/coverage/packaging docs if relevant.
 
 ## Quality gates
 
-- [ ] Run lint/type checks:
+- [ ] Configure + build with CMake presets:
 
 ```bash
-npm run lint
+cmake --preset ci
+cmake --build --preset ci
 ```
 
-- [ ] Run full tests:
+- [ ] Run unified tests:
 
 ```bash
-npm test
+ctest --preset ci --output-on-failure
+```
+
+- [ ] Run coverage and security scripts:
+
+```bash
+bash scripts/coverage.sh
+bash scripts/security.sh
 ```
 
 ## Package validation
@@ -37,6 +45,12 @@ npm pack --dry-run
 
 - [ ] Bump version according to semver impact.
 - [ ] Create and push a version tag.
+- [ ] Build signed/notarized artifacts as needed:
+
+```bash
+bash scripts/package-macos.sh
+```
+
 - [ ] Publish GitHub release notes.
 - [ ] Publish to npm (`--access public` for first scoped public release).
 

@@ -48,7 +48,7 @@ function locateBuiltBinary() {
 }
 
 function ensureFrontendBundle() {
-  const frontendBundle = path.join(rootDir, "src", "frontend_bundle.hpp");
+  const frontendBundle = path.join(rootDir, "app", "generated", "frontend_bundle.hpp");
   const frontendProject = path.join(rootDir, "frontend", "package.json");
   const frontendModules = path.join(rootDir, "frontend", "node_modules");
   const skipBuild = process.env.SHIBUI_SKIP_FRONTEND_BUILD === "1";
@@ -56,7 +56,7 @@ function ensureFrontendBundle() {
 
   if (skipBuild) {
     if (!fs.existsSync(frontendBundle)) {
-      console.error("SHIBUI_SKIP_FRONTEND_BUILD is set, but src/frontend_bundle.hpp is missing.");
+      console.error("SHIBUI_SKIP_FRONTEND_BUILD is set, but app/generated/frontend_bundle.hpp is missing.");
       process.exit(1);
     }
     return;
@@ -67,7 +67,7 @@ function ensureFrontendBundle() {
   }
 
   if (!fs.existsSync(frontendProject)) {
-    console.error("frontend/package.json is missing and src/frontend_bundle.hpp is unavailable.");
+    console.error("frontend/package.json is missing and app/generated/frontend_bundle.hpp is unavailable.");
     process.exit(1);
   }
 

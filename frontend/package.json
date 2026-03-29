@@ -9,7 +9,12 @@
     "typecheck": "tsc --noEmit",
     "lint": "npm run typecheck",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "test:contract": "vitest run src/__tests__/native.test.ts src/__tests__/bridge-contract.test.ts",
+    "test:coverage": "vitest run --coverage",
+    "dev:e2e-server": "vite preview --host 127.0.0.1 --port 4173 --strictPort",
+    "e2e:install": "node ../scripts/run-playwright.mjs install",
+    "test:e2e": "node ../scripts/run-playwright.mjs test"
   },
   "dependencies": {
     "@lezer/highlight": "^1.0.0",

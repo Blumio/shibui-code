@@ -20,43 +20,33 @@ jobs:
         with:
           node-version: "20"
 
-      - name: Install Python
+      - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
-      - name: Install frontend dependencies
-        run: npm --prefix frontend install
+      - name: Install Python test dependencies
+        run: python -m pip install --upgrade pip pytest
 
-      - name: Run frontend lint/typecheck
-        run: npm run lint
+      - name: Configure CMake (ci preset)
+        run: cmake --preset ci
 
-      - name: Run frontend tests
-        run: npm --prefix frontend run test
+      - name: Build (ci preset)
+        run: cmake --build --preset ci
 
-      - name: Build frontend bundle header
-        run: npm run build:frontend
-
-      - name: Configure CMake
-        run: cmake -S . -B build -DSHIBUI_BUILD_TESTS=ON -DCMAKE_BUILD_TYPE=Release
-
-      - name: Build native app
-        run: cmake --build build --config Release
-
-      - name: Run native tests
-        run: ctest --test-dir build --output-on-failure -C Release
-
-      - name: Run Python tests
-        run: python -m pip install pytest && pytest -q
+      - name: Run unified tests (CTest)
+        env:
+          SHIBUI_REQUIRE_E2E: "1"
+        run: ctest --preset ci --output-on-failure
 
       - name: Build packages
-        run: cpack --config build/CPackConfig.cmake -C Release
+        run: cpack --config build/ci/CPackConfig.cmake
 
       - name: Upload packages
         uses: actions/upload-artifact@v4
         with:
           name: shibui-code-macos
           path: |
-            *.tgz
-            *.tar.gz
-            *.dmg
+            build/ci/*.tgz
+            build/ci/*.tar.gz
+            build/ci/*.dmg

@@ -15,6 +15,7 @@ describe("analysis shortcuts", () => {
 
     expect(keys.includes("Mod-z")).toBe(false);
     expect(keys.includes("Mod-c")).toBe(true);
+    expect(keys.includes("Mod-v")).toBe(true);
     expect(keys.includes("Mod-Shift-y")).toBe(true);
     expect(keys.includes("Mod-Shift-x")).toBe(true);
   });

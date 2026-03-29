@@ -23,7 +23,7 @@ import {
   openSearchModal,
   openTextInputModal,
 } from "./modal";
-import { clearSnapshot, copyText, resizeWindow, syncSnapshot } from "./native";
+import { clearSnapshot, copyText, pasteText, resizeWindow, syncSnapshot } from "./native";
 import { emptyPlaceholderExtension, normalizePlaceholderInput } from "./placeholder";
 import {
   activeTab,
@@ -300,6 +300,11 @@ export class ShibuiApp {
         key: "Mod-c",
         preventDefault: true,
         run: () => this.copySelectionToClipboard(),
+      },
+      {
+        key: "Mod-v",
+        preventDefault: true,
+        run: () => this.pasteClipboardToEditor(),
       },
       {
         key: "Mod-Shift-y",
@@ -906,6 +911,34 @@ export class ShibuiApp {
     return true;
   }
 
+  private pasteClipboardToEditor(): boolean {
+    if (this.editor === null) {
+      return false;
+    }
+
+    void this.insertClipboardText();
+    return true;
+  }
+
+  private async insertClipboardText(): Promise<void> {
+    const content = await pasteText();
+    if (content === null || content.length === 0 || this.editor === null) {
+      return;
+    }
+
+    const selection = this.editor.state.selection.main;
+    this.editor.dispatch({
+      changes: {
+        from: selection.from,
+        to: selection.to,
+        insert: content,
+      },
+      selection: {
+        anchor: selection.from + content.length,
+      },
+    });
+  }
+
   private helpShortcuts(): Array<{ shortcut: string; description: string }> {
     return [
       { shortcut: "Help", description: "Write code without help or distractions." },
@@ -917,6 +950,7 @@ export class ShibuiApp {
       { shortcut: "Cmd/Ctrl+P", description: "Configure empty-page placeholder text." },
       { shortcut: "Cmd/Ctrl+H", description: "Show this help window." },
       { shortcut: "Cmd/Ctrl+C", description: "Copy selected editor text." },
+      { shortcut: "Cmd/Ctrl+V", description: "Paste clipboard text into the editor." },
       { shortcut: "Cmd/Ctrl+Shift+Y", description: "Toggle syntax highlighting." },
       { shortcut: "Cmd/Ctrl+Shift+X", description: "Toggle lint diagnostics." },
       { shortcut: "Cmd/Ctrl+1..9", description: "Switch to tab by index." },
