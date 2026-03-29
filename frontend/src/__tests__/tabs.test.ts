@@ -74,7 +74,7 @@ describe("tabs", () => {
   it("updates language", () => {
     const state = updateTabLanguage(createInitialTabState(), 1, "rust");
     expect(state.tabs[0].language).toBe("rust");
-    expect(state.tabs[0].title).toBe("Tab 1");
+    expect(state.tabs[0].title).toBe("New Tab");
   });
 
   it("updates title", () => {

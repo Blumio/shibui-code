@@ -10,7 +10,7 @@ export interface TabState {
 export function createTab(id: number, language: LanguageId = defaultLanguage()): TabModel {
   return {
     id,
-    title: `Tab ${id}`,
+    title: `New Tab`,
     language,
     content: "",
   };
