@@ -399,13 +399,13 @@ export class ShibuiApp {
       return;
     }
 
-    if (event.shiftKey && event.key.toLowerCase() === "y") {
+    if (event.shiftKey && event.key.toLowerCase() === "h") {
       event.preventDefault();
       this.toggleHighlighting();
       return;
     }
 
-    if (event.shiftKey && event.key.toLowerCase() === "u") {
+    if (event.shiftKey && event.key.toLowerCase() === "l") {
       event.preventDefault();
       this.toggleDiagnostics();
       return;
