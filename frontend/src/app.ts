@@ -80,7 +80,7 @@ export class ShibuiApp {
 
   private currentTheme: ThemeSpec = defaultTheme;
 
-  private emptyPagePlaceholder = "";
+  private emptyPagePlaceholder = "Cmd+H to show shortcuts";
 
   private highlightingEnabled = true;
 
@@ -257,7 +257,7 @@ export class ShibuiApp {
         },
       },
       {
-        key: "Mod-s",
+        key: "Mod-t",
         preventDefault: true,
         run: () => {
           void this.openThemeSearch();
@@ -289,12 +289,12 @@ export class ShibuiApp {
         },
       },
       {
-        key: "Mod-Shift-y",
+        key: "Mod-Shift-h",
         preventDefault: true,
         run: () => this.toggleHighlighting(),
       },
       {
-        key: "Mod-Shift-u",
+        key: "Mod-Shift-l",
         preventDefault: true,
         run: () => this.toggleDiagnostics(),
       },
@@ -363,7 +363,7 @@ export class ShibuiApp {
       return;
     }
 
-    if (event.key.toLowerCase() === "s") {
+    if (event.key.toLowerCase() === "t") {
       event.preventDefault();
       void this.openThemeSearch();
       return;
@@ -587,7 +587,7 @@ export class ShibuiApp {
       this.tabsElement.clientWidth,
       this.tabsElement.scrollLeft,
     );
-
+    "TODO: The tab overflow is obsolete, failed to implement correctly."
     this.tabBarElement.classList.toggle("tabbar-overflowing", overflow.hasOverflow);
     this.tabsElement.classList.toggle("tabs-overflowing", overflow.hasOverflow);
     this.tabScrollLeftButton.disabled = !overflow.canScrollLeft;
@@ -862,16 +862,19 @@ export class ShibuiApp {
 
   private helpShortcuts(): Array<{ shortcut: string; description: string }> {
     return [
-      { shortcut: "Cmd/Ctrl+N", description: "Create a new temporary tab." },
+      { shortcut: "Help", description: "Write code without distractions." },
+      { shortcut: "Cmd/Ctrl+N", description: "Create a new tab." },
       { shortcut: "Cmd/Ctrl+W", description: "Close the active tab." },
-      { shortcut: "Cmd/Ctrl+S", description: "Open Theme Search Mode." },
+      { shortcut: "Cmd/Ctrl+R", description: "Rename active tab." },
+      { shortcut: "Cmd/Ctrl+T", description: "Open Theme Search Mode." },
       { shortcut: "Cmd/Ctrl+L", description: "Open language selection." },
       { shortcut: "Cmd/Ctrl+P", description: "Configure empty-page placeholder text." },
       { shortcut: "Cmd/Ctrl+H", description: "Show this help window." },
-      { shortcut: "Cmd/Ctrl+Shift+Y", description: "Toggle syntax highlighting." },
-      { shortcut: "Cmd/Ctrl+Shift+U", description: "Toggle lint diagnostics." },
+      { shortcut: "Cmd/Ctrl+Shift+H", description: "Toggle syntax highlighting." },
+      { shortcut: "Cmd/Ctrl+Shift+L", description: "Toggle lint diagnostics." },
       { shortcut: "Cmd/Ctrl+1..9", description: "Switch to tab by index." },
       { shortcut: "Cmd/Ctrl+Left/Right", description: "Switch to previous/next tab." },
+      { shortcut: "Info", description: "Tab contents are copied to clipboard upon closing this app." },
       { shortcut: "Escape", description: "Close open modal dialogs." },
     ];
   }
