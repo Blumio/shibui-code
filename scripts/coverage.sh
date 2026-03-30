@@ -54,7 +54,8 @@ python3 -m gcovr \
   --exclude "$BUILD_DIR/_deps" \
   --gcov-ignore-errors source_not_found \
   --gcov-ignore-errors no_working_dir_found \
-  --cobertura "$BACKEND_COVERAGE_DIR/backend-cobertura.xml"
+  --cobertura "$BACKEND_COVERAGE_DIR/backend-cobertura.xml" \
+  "$BUILD_DIR"
 
 python3 -m gcovr \
   -r "$ROOT_DIR" \
@@ -65,7 +66,8 @@ python3 -m gcovr \
   --exclude "$BUILD_DIR/_deps" \
   --gcov-ignore-errors source_not_found \
   --gcov-ignore-errors no_working_dir_found \
-  --html-details "$BACKEND_COVERAGE_DIR/index.html"
+  --html-details "$BACKEND_COVERAGE_DIR/index.html" \
+  "$BUILD_DIR"
 
 BACKEND_COBERTURA="$BACKEND_COVERAGE_DIR/backend-cobertura.xml"
 MERGED_COBERTURA="$MERGED_COVERAGE_DIR/coverage-cobertura.xml"
