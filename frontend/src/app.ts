@@ -96,8 +96,26 @@ export class ShibuiApp {
 
   private toastTimerId: number | null = null;
 
+  private initialized = false;
+
+  private readonly onWindowKeydown: (event: KeyboardEvent) => void;
+
+  private readonly onWindowBeforeUnload: () => void;
+
+  private readonly onWindowResize: () => void;
+
   constructor(root: HTMLElement) {
     this.root = root;
+    this.onWindowKeydown = (event) => {
+      this.handleGlobalShortcuts(event);
+    };
+    this.onWindowBeforeUnload = () => {
+      this.flushSnapshot();
+      this.tabState = clearTabs();
+    };
+    this.onWindowResize = () => {
+      this.updateTabOverflowState();
+    };
 
     this.shellElement = document.createElement("div");
     this.shellElement.className = "app-shell";
@@ -172,26 +190,44 @@ export class ShibuiApp {
   }
 
   async initialize(): Promise<void> {
+    if (this.initialized) {
+      return;
+    }
+
     this.root.classList.add(this.currentTheme.editorClassName);
     this.renderTabs();
     this.createEditor();
 
-    window.addEventListener("keydown", (event) => {
-      this.handleGlobalShortcuts(event);
-    });
-
-    window.addEventListener("beforeunload", () => {
-      this.flushSnapshot();
-      this.tabState = clearTabs();
-    });
-
-    window.addEventListener("resize", () => {
-      this.updateTabOverflowState();
-    });
+    window.addEventListener("keydown", this.onWindowKeydown);
+    window.addEventListener("beforeunload", this.onWindowBeforeUnload);
+    window.addEventListener("resize", this.onWindowResize);
 
     await clearSnapshot();
     this.flushSnapshot();
     this.updateTabOverflowState();
+    this.initialized = true;
+  }
+
+  destroy(): void {
+    if (this.initialized) {
+      window.removeEventListener("keydown", this.onWindowKeydown);
+      window.removeEventListener("beforeunload", this.onWindowBeforeUnload);
+      window.removeEventListener("resize", this.onWindowResize);
+    }
+
+    if (this.toastTimerId !== null) {
+      window.clearTimeout(this.toastTimerId);
+      this.toastTimerId = null;
+    }
+
+    if (this.editor !== null) {
+      this.editor.destroy();
+      this.editor = null;
+    }
+
+    this.root.classList.remove(this.currentTheme.editorClassName);
+    this.shellElement.remove();
+    this.initialized = false;
   }
 
   private buildBaseExtensions(): Extension[] {

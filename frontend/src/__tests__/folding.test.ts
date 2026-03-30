@@ -8,10 +8,13 @@ describe("folding", () => {
     document.body.appendChild(root);
 
     const app = new ShibuiApp(root);
-    await app.initialize();
+    try {
+      await app.initialize();
 
-    expect(root.querySelector(".cm-foldGutter")).not.toBeNull();
-
-    root.remove();
+      expect(root.querySelector(".cm-foldGutter")).not.toBeNull();
+    } finally {
+      app.destroy();
+      root.remove();
+    }
   });
 });

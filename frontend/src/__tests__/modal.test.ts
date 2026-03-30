@@ -61,4 +61,29 @@ describe("modal", () => {
 
     await expect(promise).resolves.toBe(".cm-content { color: #fff; }");
   });
+
+  it("mounts modal overlays inside #app when available", async () => {
+    const appRoot = document.createElement("div");
+    appRoot.id = "app";
+    appRoot.className = "theme-github-light";
+    document.body.appendChild(appRoot);
+
+    try {
+      const promise = openTextInputModal({
+        title: "Placeholder",
+        placeholder: "Type your placeholder for an empty page.",
+      });
+
+      const overlay = appRoot.querySelector(".modal-overlay");
+      expect(overlay).not.toBeNull();
+      expect(overlay?.parentElement).toBe(appRoot);
+
+      const input = appRoot.querySelector(".modal-input") as HTMLInputElement;
+      expect(input).not.toBeNull();
+      input.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+      await expect(promise).resolves.toBeNull();
+    } finally {
+      appRoot.remove();
+    }
+  });
 });

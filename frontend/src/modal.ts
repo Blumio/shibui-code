@@ -38,6 +38,15 @@ function createElement<K extends keyof HTMLElementTagNameMap>(
   return element;
 }
 
+function resolveModalHost(): HTMLElement {
+  const appRoot = document.getElementById("app");
+  if (appRoot instanceof HTMLElement) {
+    return appRoot;
+  }
+
+  return document.body;
+}
+
 export async function openSearchModal(options: SearchModalOptions): Promise<string | null> {
   return new Promise<string | null>((resolve) => {
     const overlay = createElement("div", "modal-overlay");
@@ -119,7 +128,7 @@ export async function openSearchModal(options: SearchModalOptions): Promise<stri
 
     modal.append(title, input, list);
     overlay.appendChild(modal);
-    document.body.appendChild(overlay);
+    resolveModalHost().appendChild(overlay);
 
     updateItems();
     input.focus();
@@ -164,7 +173,7 @@ export async function openTextInputModal(options: TextInputModalOptions): Promis
 
     modal.append(title, input, hint);
     overlay.appendChild(modal);
-    document.body.appendChild(overlay);
+    resolveModalHost().appendChild(overlay);
     input.focus();
     input.setSelectionRange(input.value.length, input.value.length);
   });
@@ -212,7 +221,7 @@ export async function openMultilineInputModal(
 
     modal.append(title, input, hint);
     overlay.appendChild(modal);
-    document.body.appendChild(overlay);
+    resolveModalHost().appendChild(overlay);
     input.focus();
     input.setSelectionRange(input.value.length, input.value.length);
   });
@@ -262,6 +271,6 @@ export async function openHelpModal(options: HelpModalOptions): Promise<void> {
     window.addEventListener("keydown", handleKeydown);
     modal.append(title, list);
     overlay.appendChild(modal);
-    document.body.appendChild(overlay);
+    resolveModalHost().appendChild(overlay);
   });
 }

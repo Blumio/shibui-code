@@ -38,78 +38,90 @@ describe("copy shortcut", () => {
     const root = document.createElement("div");
     document.body.appendChild(root);
     const app = new ShibuiApp(root);
-    await app.initialize();
+    try {
+      await app.initialize();
 
-    const internals = app as unknown as AppInternals;
-    if (internals.editor === null) {
-      throw new Error("Expected editor to be initialized");
+      const internals = app as unknown as AppInternals;
+      if (internals.editor === null) {
+        throw new Error("Expected editor to be initialized");
+      }
+      const editor = internals.editor;
+
+      editor.dispatch({
+        changes: {
+          from: 0,
+          to: editor.state.doc.length,
+          insert: "alpha\nbeta",
+        },
+      });
+      editor.dispatch({ selection: { anchor: 0, head: 5 } });
+
+      const copySpy = vi.spyOn(nativeBridge, "copyText").mockResolvedValue(undefined);
+
+      const run = bindingByKey(internals.editorKeyBindings(), "Mod-c").run;
+      expect(run?.()).toBe(true);
+      expect(copySpy).toHaveBeenCalledWith("alpha");
+    } finally {
+      app.destroy();
     }
-    const editor = internals.editor;
-
-    editor.dispatch({
-      changes: {
-        from: 0,
-        to: editor.state.doc.length,
-        insert: "alpha\nbeta",
-      },
-    });
-    editor.dispatch({ selection: { anchor: 0, head: 5 } });
-
-    const copySpy = vi.spyOn(nativeBridge, "copyText").mockResolvedValue(undefined);
-
-    const run = bindingByKey(internals.editorKeyBindings(), "Mod-c").run;
-    expect(run?.()).toBe(true);
-    expect(copySpy).toHaveBeenCalledWith("alpha");
   });
 
   it("does nothing when Mod-c is used without a selection", async () => {
     const root = document.createElement("div");
     document.body.appendChild(root);
     const app = new ShibuiApp(root);
-    await app.initialize();
+    try {
+      await app.initialize();
 
-    const internals = app as unknown as AppInternals;
-    if (internals.editor === null) {
-      throw new Error("Expected editor to be initialized");
+      const internals = app as unknown as AppInternals;
+      if (internals.editor === null) {
+        throw new Error("Expected editor to be initialized");
+      }
+      const editor = internals.editor;
+      editor.dispatch({ selection: { anchor: 0 } });
+
+      const copySpy = vi.spyOn(nativeBridge, "copyText").mockResolvedValue(undefined);
+
+      const run = bindingByKey(internals.editorKeyBindings(), "Mod-c").run;
+      expect(run?.()).toBe(true);
+      expect(copySpy).not.toHaveBeenCalled();
+    } finally {
+      app.destroy();
     }
-    const editor = internals.editor;
-    editor.dispatch({ selection: { anchor: 0 } });
-
-    const copySpy = vi.spyOn(nativeBridge, "copyText").mockResolvedValue(undefined);
-
-    const run = bindingByKey(internals.editorKeyBindings(), "Mod-c").run;
-    expect(run?.()).toBe(true);
-    expect(copySpy).not.toHaveBeenCalled();
   });
 
   it("pastes clipboard text via Mod-v", async () => {
     const root = document.createElement("div");
     document.body.appendChild(root);
     const app = new ShibuiApp(root);
-    await app.initialize();
+    try {
+      await app.initialize();
 
-    const internals = app as unknown as AppInternals;
-    if (internals.editor === null) {
-      throw new Error("Expected editor to be initialized");
+      const internals = app as unknown as AppInternals;
+      if (internals.editor === null) {
+        throw new Error("Expected editor to be initialized");
+      }
+      const editor = internals.editor;
+
+      editor.dispatch({
+        changes: {
+          from: 0,
+          to: editor.state.doc.length,
+          insert: "alpha",
+        },
+      });
+      editor.dispatch({ selection: { anchor: 5 } });
+
+      const pasteSpy = vi.spyOn(nativeBridge, "pasteText").mockResolvedValue(" beta");
+
+      const run = bindingByKey(internals.editorKeyBindings(), "Mod-v").run;
+      expect(run?.()).toBe(true);
+      await vi.waitFor(() => {
+        expect(pasteSpy).toHaveBeenCalled();
+        expect(editor.state.doc.toString()).toBe("alpha beta");
+      });
+    } finally {
+      app.destroy();
     }
-    const editor = internals.editor;
-
-    editor.dispatch({
-      changes: {
-        from: 0,
-        to: editor.state.doc.length,
-        insert: "alpha",
-      },
-    });
-    editor.dispatch({ selection: { anchor: 5 } });
-
-    const pasteSpy = vi.spyOn(nativeBridge, "pasteText").mockResolvedValue(" beta");
-
-    const run = bindingByKey(internals.editorKeyBindings(), "Mod-v").run;
-    expect(run?.()).toBe(true);
-    await vi.waitFor(() => {
-      expect(pasteSpy).toHaveBeenCalled();
-      expect(editor.state.doc.toString()).toBe("alpha beta");
-    });
   });
 });

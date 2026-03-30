@@ -1,13 +1,22 @@
 :root {
   --chrome-bg: #101317;
-  --chrome-border: #242e39;
-  --tab-bg: #141922;
-  --tab-active-bg: #212a36;
-  --tab-fg: #9fb0c3;
-  --tab-active-fg: #ecf2fa;
+  --chrome-border: #2a2a2a;
+  --tabbar-bg: rgb(8, 8, 8);
+  --tab-bg: rgb(8, 8, 8);
+  --tab-hover-bg: rgb(42, 42, 42);
+  --tab-active-bg: rgb(56, 56, 56);
+  --tab-fg: rgb(184, 184, 184);
+  --tab-active-fg: rgb(184, 184, 184);
+  --popup-bg: var(--tab-active-bg);
+  --popup-fg: var(--tab-active-fg);
+  --popup-border: var(--chrome-border);
+  --popup-input-bg: var(--tab-bg);
+  --modal-help-item-bg: #272727;
+  --modal-help-shortcut-fg: #d4d4d4;
+  --modal-help-description-fg: #c8c8c8;
   --surface: #1e1e1e;
-  --lint-popover-bg: #727272;
-  --lint-popover-fg: #ffffff;
+  --lint-popover-bg: var(--popup-bg);
+  --lint-popover-fg: var(--popup-fg);
   --lint-popover-border: transparent;
   --lint-popover-shadow: rgba(0, 0, 0, 0.25);
   --lint-accent-warning: #e7be53;
@@ -45,7 +54,7 @@ body,
   align-items: center;
   gap: 8px;
   min-height: 44px;
-  background: linear-gradient(180deg, #151b23 0%, #111820 100%);
+  background: var(--tabbar-bg);
   border-bottom: 1px solid var(--chrome-border);
   padding: 6px 8px;
 }
@@ -64,7 +73,7 @@ body,
   border: none;
   border-radius: 999px;
   background: transparent;
-  color: #9fb0c3;
+  color: var(--tab-fg);
   font-size: 10px;
   line-height: 1;
   text-align: center;
@@ -80,7 +89,7 @@ body,
 }
 
 .tabbar-toggle:hover {
-  color: #dce7f5;
+  color: var(--tab-active-fg);
 }
 
 .tabbar-toggle::before {
@@ -88,8 +97,8 @@ body,
   position: absolute;
   inset: 4px 14px;
   border-radius: 999px;
-  border: 1px solid rgba(86, 111, 136, 0.65);
-  background: rgba(32, 44, 58, 0.9);
+  border: 1px solid var(--tab-bg);
+  background: var(--tab-bg);
 }
 
 .tabbar-toggle::after {
@@ -197,6 +206,10 @@ body,
   cursor: pointer;
 }
 
+.tab-interactive:hover:not(.tab-active) {
+  background: var(--tab-hover-bg);
+}
+
 .tab-active {
   background: var(--tab-active-bg);
   color: var(--tab-active-fg);
@@ -231,7 +244,14 @@ body,
   border-radius: 4px;
   color: inherit;
   font-size: 11px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s ease;
+}
+
+.tab:hover .tab-close {
   opacity: 0.85;
+  pointer-events: auto;
 }
 
 .tab-close:hover {
@@ -244,7 +264,7 @@ body,
   height: 30px;
   border-radius: 8px;
   background: var(--tab-bg);
-  color: #dce7f5;
+  color: var(--tab-fg);
   font-size: 18px;
 }
 
@@ -259,7 +279,7 @@ body,
   height: 30px;
   border-radius: 8px;
   background: var(--tab-bg);
-  color: #dce7f5;
+  color: var(--tab-fg);
   font-size: 14px;
 }
 
@@ -379,7 +399,7 @@ body,
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(9, 12, 17, 0.66);
+  background: rgba(19, 19, 19, 0.66);
   display: flex;
   align-items: flex-start;
   justify-content: center;
@@ -391,8 +411,8 @@ body,
   width: min(560px, 92vw);
   max-height: calc(100vh - 32px);
   border-radius: 12px;
-  border: 1px solid #2c3948;
-  background: #161d25;
+  border: 1px solid var(--popup-border);
+  background: var(--popup-bg);
   box-shadow: 0 20px 56px rgba(0, 0, 0, 0.4);
   display: grid;
   grid-template-rows: auto auto minmax(120px, 46vh);
@@ -416,25 +436,25 @@ body,
 
 .modal-title {
   padding: 14px 16px 10px;
-  color: #e3edf8;
+  color: var(--popup-fg);
   font-size: 13px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  border-bottom: 1px solid #2c3948;
+  border-bottom: 1px solid var(--popup-border);
 }
 
 .modal-input {
   margin: 10px 12px;
   padding: 10px 12px;
   border-radius: 8px;
-  border: 1px solid #314155;
-  background: #0f141b;
-  color: #dce7f5;
+  border: 1px solid var(--popup-fg);
+  background: var(--popup-input-bg);
+  color: var(--popup-fg);
   outline: none;
 }
 
 .modal-input:focus {
-  border-color: #5f8bb6;
+  border-color: var(--popup-fg);
 }
 
 .modal-textarea {
@@ -443,9 +463,9 @@ body,
   max-height: 46vh;
   padding: 10px 12px;
   border-radius: 8px;
-  border: 1px solid #314155;
-  background: #0f141b;
-  color: #dce7f5;
+  border: 1px solid var(--popup-fg);
+  background: var(--popup-input-bg);
+  color: var(--popup-fg);
   outline: none;
   resize: vertical;
   font-family: "Iosevka", "JetBrains Mono", "Fira Code", monospace;
@@ -455,7 +475,7 @@ body,
 }
 
 .modal-textarea:focus {
-  border-color: #5f8bb6;
+  border-color: var(--popup-fg);
 }
 
 .modal-list {
@@ -470,18 +490,18 @@ body,
   border-radius: 8px;
   text-align: left;
   padding: 10px 12px;
-  color: #d4e1f0;
+  color: var(--popup-fg);
   background: transparent;
   cursor: pointer;
 }
 
 .modal-item:hover,
 .modal-item-selected {
-  background: #253243;
+  background: var(--tab-hover-bg);
 }
 
 .modal-item-empty {
-  color: #8ea0b4;
+  color: var(--popup-fg);
   cursor: default;
 }
 
@@ -491,17 +511,17 @@ body,
   gap: 10px;
   border-radius: 8px;
   padding: 10px 12px;
-  background: rgba(19, 27, 37, 0.42);
+  background: var(--modal-help-item-bg);
 }
 
 .modal-help-shortcut {
-  color: #f1f6fc;
+  color: var(--modal-help-shortcut-fg);
   font-family: "Iosevka", "JetBrains Mono", "Fira Code", monospace;
   font-size: 12px;
 }
 
 .modal-help-description {
-  color: #c9d9ea;
+  color: var(--modal-help-description-fg);
   font-size: 12px;
   line-height: 1.4;
 }
@@ -515,9 +535,9 @@ body,
   min-width: min(520px, 86vw);
   padding: 20px 28px;
   border-radius: 12px;
-  border: 1px solid rgba(126, 151, 177, 0.45);
-  background: rgba(18, 28, 39, 0.4);
-  color: #e2ecf8;
+  border: 1px solid var(--popup-border);
+  background: var(--popup-bg);
+  color: var(--popup-fg);
   font-size: 19px;
   letter-spacing: 0.01em;
   backdrop-filter: blur(6px);
@@ -525,19 +545,134 @@ body,
   text-align: center;
 }
 
-.theme-github-light,
-.theme-solarized-light {
+
+.theme-github-light {
   --chrome-bg: #eef2f7;
   --chrome-border: #d1d7df;
+  --tabbar-bg: #eef2f7;
   --tab-bg: #e6ebf2;
+  --tab-hover-bg: #dbe3ed;
   --tab-active-bg: #ffffff;
   --tab-fg: #516173;
   --tab-active-fg: #1f2a36;
-  --lint-popover-bg: #727272;
-  --lint-popover-fg: #ffffff;
+  --popup-border: var(--chrome-border);
+  --popup-input-bg: var(--tab-bg);
+  --lint-popover-bg: var(--popup-bg);
+  --lint-popover-fg: var(--popup-fg);
   --lint-popover-border: transparent;
   --lint-popover-shadow: rgba(0, 0, 0, 0.15);
   --lint-accent-warning: #c79223;
+  --lint-accent-error: #e00000;
+  --lint-opacity: 0.8;
+  --popup-bg: var(--tabbar-bg);
+  --popup-fg: var(--tab-fg);
+  --modal-help-item-bg: rgba(243, 246, 250, 0.86);
+  --modal-help-shortcut-fg: #1f2a36;
+  --modal-help-description-fg: #415264;
+}
+
+.theme-solarized-light {
+  --chrome-bg: #eef2f7;
+  --chrome-border: #d1d7df;
+  --tabbar-bg: #eef2f7;
+  --tab-bg: #e6ebf2;
+  --tab-hover-bg: #dbe3ed;
+  --tab-active-bg: #ffffff;
+  --tab-fg: #516173;
+  --tab-active-fg: #1f2a36;
+  --popup-bg: var(--tab-active-bg);
+  --popup-fg: var(--tab-active-fg);
+  --popup-border: var(--chrome-border);
+  --popup-input-bg: var(--tab-bg);
+  --lint-popover-bg: var(--popup-bg);
+  --lint-popover-fg: var(--popup-fg);
+  --lint-popover-border: transparent;
+  --lint-popover-shadow: rgba(0, 0, 0, 0.15);
+  --lint-accent-warning: #c79223;
+  --lint-accent-error: #e00000;
+  --lint-opacity: 0.8;
+  --modal-help-item-bg: var(--tabbar-bg);
+  --modal-help-shortcut-fg: #586e75;
+  --modal-help-description-fg: #657b83;
+}
+
+
+.theme-monokai {
+  --chrome-bg: #171610;
+  --chrome-border: #2a2a2a;
+  --tabbar-bg: rgb(27, 27, 20);
+  --tab-bg: rgb(27, 27, 20);
+  --tab-hover-bg: rgb(42, 42, 36);
+  --tab-active-bg: rgb(56, 56, 46);
+  --tab-fg: rgb(184, 184, 184);
+  --tab-active-fg: rgb(184, 184, 184);
+  --popup-bg: var(--tab-active-bg);
+  --popup-fg: #e1e3d6;
+  --popup-border: var(--chrome-border);
+  --popup-input-bg: var(--tab-bg);
+  --modal-help-item-bg: rgb(46, 46, 36);
+  --modal-help-shortcut-fg: rgb(210, 210, 190);
+  --modal-help-description-fg: rgb(210, 210, 190);
+  --surface: #1e1e1e;
+  --lint-popover-bg: var(--popup-bg);
+  --lint-popover-fg: var(--popup-fg);
+  --lint-popover-border: transparent;
+  --lint-popover-shadow: rgba(0, 0, 0, 0.25);
+  --lint-accent-warning: #e7be53;
+  --lint-accent-error: #e00000;
+  --lint-opacity: 0.8;
+}
+
+
+.theme-dracula {
+  --chrome-bg: #101017;
+  --chrome-border: #2a2a2a;
+  --tabbar-bg: rgb(21, 20, 27);
+  --tab-bg: rgb(20, 20, 27);
+  --tab-hover-bg: rgb(36, 36, 42);
+  --tab-active-bg: rgb(46, 46, 56);
+  --tab-fg: rgb(184, 184, 184);
+  --tab-active-fg: rgb(184, 184, 184);
+  --popup-bg: var(--tab-active-bg);
+  --popup-fg: #d6d6e3;
+  --popup-border: var(--chrome-border);
+  --popup-input-bg: var(--tab-bg);
+  --modal-help-item-bg: rgb(36, 36, 46);
+  --modal-help-shortcut-fg: rgb(192, 190, 210);
+  --modal-help-description-fg: rgb(192, 190, 210);
+  --surface: #1e1e1e;
+  --lint-popover-bg: var(--popup-bg);
+  --lint-popover-fg: var(--popup-fg);
+  --lint-popover-border: transparent;
+  --lint-popover-shadow: rgba(0, 0, 0, 0.25);
+  --lint-accent-warning: #e7be53;
+  --lint-accent-error: #e00000;
+  --lint-opacity: 0.8;
+}
+
+
+.theme-solarized-dark {
+  --chrome-bg: #101517;
+  --chrome-border: #2a2a2a;
+  --tabbar-bg: rgb(20, 26, 27);
+  --tab-bg: rgb(20, 26, 27);
+  --tab-hover-bg: rgb(36, 41, 42);
+  --tab-active-bg: rgb(46, 55, 56);
+  --tab-fg: rgb(184, 184, 184);
+  --tab-active-fg: rgb(184, 184, 184);
+  --popup-bg: var(--tab-active-bg);
+  --popup-fg: #d6e3e3;
+  --popup-border: var(--chrome-border);
+  --popup-input-bg: var(--tab-bg);
+  --modal-help-item-bg: rgb(36, 45, 46);
+  --modal-help-shortcut-fg: rgb(190, 210, 210);
+  --modal-help-description-fg: rgb(190, 210, 210);
+  --surface: #1e1e1e;
+  --lint-popover-bg: var(--popup-bg);
+  --lint-popover-fg: var(--popup-fg);
+  --lint-popover-border: transparent;
+  --lint-popover-shadow: rgba(0, 0, 0, 0.25);
+  --lint-accent-warning: #e7be53;
   --lint-accent-error: #e00000;
   --lint-opacity: 0.8;
 }
@@ -546,21 +681,6 @@ body,
 .theme-solarized-light {
   background: linear-gradient(180deg, #f8fafc 0%, #e9eef4 100%);
   color: #1f2a36;
-}
-
-.theme-github-light .modal-help-item,
-.theme-solarized-light .modal-help-item {
-  background: rgba(243, 246, 250, 0.86);
-}
-
-.theme-github-light .modal-help-shortcut,
-.theme-solarized-light .modal-help-shortcut {
-  color: #1f2a36;
-}
-
-.theme-github-light .modal-help-description,
-.theme-solarized-light .modal-help-description {
-  color: #415264;
 }
 
 @media (max-width: 640px) {

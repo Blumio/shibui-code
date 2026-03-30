@@ -8,16 +8,19 @@ describe("shortcut toast", () => {
     document.body.appendChild(root);
     const app = new ShibuiApp(root);
 
-    (
-      app as unknown as {
-        showShortcutToast: (message: string) => void;
-      }
-    ).showShortcutToast("Test toast message");
+    try {
+      (
+        app as unknown as {
+          showShortcutToast: (message: string) => void;
+        }
+      ).showShortcutToast("Test toast message");
 
-    const toast = root.querySelector(".shortcut-toast");
-    expect(toast).not.toBeNull();
-    expect(toast?.textContent).toBe("Test toast message");
-
-    root.remove();
+      const toast = root.querySelector(".shortcut-toast");
+      expect(toast).not.toBeNull();
+      expect(toast?.textContent).toBe("Test toast message");
+    } finally {
+      app.destroy();
+      root.remove();
+    }
   });
 });

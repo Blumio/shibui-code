@@ -5,6 +5,7 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 BUILD_DIR="$ROOT_DIR/build/release"
 VERSION="$(node -p "JSON.parse(require('fs').readFileSync('package.json','utf8')).version")"
 APP_BUNDLE="$BUILD_DIR/shibui-code.app"
+DMG_VOLUME="/Volumes/Shibui-Code ${VERSION}"
 
 SIGN_IDENTITY="${SHIBUI_MACOS_SIGN_IDENTITY:-}"
 NOTARY_APPLE_ID="${SHIBUI_NOTARY_APPLE_ID:-}"
@@ -12,6 +13,13 @@ NOTARY_TEAM_ID="${SHIBUI_NOTARY_TEAM_ID:-}"
 NOTARY_PASSWORD="${SHIBUI_NOTARY_PASSWORD:-}"
 
 cd "$ROOT_DIR"
+
+cleanup_dmg_volume() {
+  if mount | grep -F "on ${DMG_VOLUME} " >/dev/null 2>&1; then
+    echo "Detaching stale DMG volume: ${DMG_VOLUME}"
+    hdiutil detach "${DMG_VOLUME}" >/dev/null 2>&1 || hdiutil detach -force "${DMG_VOLUME}" >/dev/null 2>&1 || true
+  fi
+}
 
 rm -f \
   "$BUILD_DIR/shibui-code-${VERSION}-Darwin.dmg" \
@@ -41,7 +49,21 @@ else
 fi
 
 echo "[4/5] Build release packages"
-cpack --config "$BUILD_DIR/CPackConfig.cmake"
+cleanup_dmg_volume
+if ! cpack --config "$BUILD_DIR/CPackConfig.cmake" -G TGZ; then
+  echo "Failed to generate tar.gz package."
+  exit 1
+fi
+
+DMG_BUILD_FAILED=0
+if ! cpack --config "$BUILD_DIR/CPackConfig.cmake" -G DragNDrop; then
+  cleanup_dmg_volume
+  echo "Retrying package build after DMG volume cleanup"
+  if ! cpack --config "$BUILD_DIR/CPackConfig.cmake" -G DragNDrop; then
+    echo "Warning: DMG generation failed. Continuing with tar.gz artifact only."
+    DMG_BUILD_FAILED=1
+  fi
+fi
 
 DMG_PATH="$BUILD_DIR/shibui-code-${VERSION}-Darwin.dmg"
 TGZ_PATH="$BUILD_DIR/shibui-code-${VERSION}-Darwin.tar.gz"
@@ -82,5 +104,9 @@ else
 fi
 
 echo "Artifacts:"
-echo "- $ROOT_DIR/shibui-code-${VERSION}-Darwin.dmg"
 echo "- $ROOT_DIR/shibui-code-${VERSION}-Darwin.tar.gz"
+if [[ "$DMG_BUILD_FAILED" -eq 1 ]]; then
+  echo "- DMG unavailable (hdiutil/cpack failure)"
+else
+  echo "- $ROOT_DIR/shibui-code-${VERSION}-Darwin.dmg"
+fi
