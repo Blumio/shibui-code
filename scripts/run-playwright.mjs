@@ -41,10 +41,19 @@ function shouldFailOnMissingPlaywright() {
 
 function executeLocal(actionName) {
   if (actionName === "install") {
-    return run("npm", ["--prefix", frontendDir, "exec", "playwright", "install", "chromium"]);
+    return run("npm", ["--prefix", frontendDir, "exec", "--", "playwright", "install", "chromium"]);
   }
 
-  return run("npm", ["--prefix", frontendDir, "exec", "playwright", "test", "--config", "playwright.config.ts"]);
+  return run("npm", [
+    "--prefix",
+    frontendDir,
+    "exec",
+    "--",
+    "playwright",
+    "test",
+    "--config",
+    "playwright.config.ts",
+  ]);
 }
 
 function installPinnedPlaywright() {

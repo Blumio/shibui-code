@@ -124,3 +124,9 @@ def test_playwright_fallback_provisions_playwright_test_package() -> None:
         r'install"\s*,\s*"--no-save"\s*,\s*playwrightSpecifier',
         playwright_runner,
     )
+    assert '"exec", "--", "playwright", "install", "chromium"' in playwright_runner
+    assert re.search(
+        r'"exec"\s*,\s*"--"\s*,\s*"playwright"\s*,\s*"test"\s*,'
+        r'\s*"--config"\s*,\s*"playwright\.config\.ts"',
+        playwright_runner,
+    )
