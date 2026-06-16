@@ -119,6 +119,7 @@ def test_playwright_fallback_provisions_playwright_test_package() -> None:
     assert 'const playwrightTestPackage = "@playwright/test";' in playwright_runner
     assert 'const playwrightVersion = "1.54.2";' in playwright_runner
     assert 'const playwrightSpecifier = `${playwrightTestPackage}@${playwrightVersion}`;' in playwright_runner
+    assert 'const playwrightConfig = path.join(frontendDir, "playwright.config.ts");' in playwright_runner
     assert '${playwrightTestPackage}@${playwrightVersion}' in playwright_runner
     assert re.search(
         r'install"\s*,\s*"--no-save"\s*,\s*playwrightSpecifier',
@@ -127,6 +128,6 @@ def test_playwright_fallback_provisions_playwright_test_package() -> None:
     assert '"exec", "--", "playwright", "install", "chromium"' in playwright_runner
     assert re.search(
         r'"exec"\s*,\s*"--"\s*,\s*"playwright"\s*,\s*"test"\s*,'
-        r'\s*"--config"\s*,\s*"playwright\.config\.ts"',
+        r'\s*"--config"\s*,\s*playwrightConfig',
         playwright_runner,
     )

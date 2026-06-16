@@ -8,6 +8,7 @@ import { spawnSync } from "node:child_process";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.resolve(__dirname, "..");
 const frontendDir = path.join(rootDir, "frontend");
+const playwrightConfig = path.join(frontendDir, "playwright.config.ts");
 const requireFromRoot = createRequire(import.meta.url);
 const playwrightTestPackage = "@playwright/test";
 const playwrightVersion = "1.54.2";
@@ -52,7 +53,7 @@ function executeLocal(actionName) {
     "playwright",
     "test",
     "--config",
-    "playwright.config.ts",
+    playwrightConfig,
   ]);
 }
 
