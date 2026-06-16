@@ -1,0 +1,7 @@
+name: "Shibui-Code CodeQL config"
+
+paths-ignore:
+  - app/generated/**
+  - build/**
+  - build-coverage/**
+  - .native-build/**

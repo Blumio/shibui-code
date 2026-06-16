@@ -19,4 +19,4 @@ __pycache__/
 .DS_Store
 
 # Generated frontend bundle header
-src/frontend_bundle.hpp
+app/generated/frontend_bundle.hpp

@@ -89,3 +89,22 @@ def test_package_publish_whitelist_excludes_internal_content() -> None:
     assert "frontend" not in files
     assert "scripts" not in files
     assert "LICENSE" in files
+
+
+def test_codeql_uses_source_analysis_without_generated_bundle() -> None:
+    workflow = (ROOT / ".github/workflows/codeql.yml").read_text(encoding="utf8")
+    codeql_config = ROOT / ".github/codeql/codeql-config.yml"
+    assert codeql_config.exists()
+    config = codeql_config.read_text(encoding="utf8")
+    gitignore = (ROOT / ".gitignore").read_text(encoding="utf8")
+
+    assert "github/codeql-action/init@v4" in workflow
+    assert "github/codeql-action/analyze@v4" in workflow
+    assert "build-mode: ${{ matrix.build-mode }}" in workflow
+    assert "cmake --preset ci" not in workflow
+    assert "cmake --build --preset ci" not in workflow
+    assert "app/generated/**" in config
+    assert "build/**" in config
+    assert "build-coverage/**" in config
+    assert ".native-build/**" in config
+    assert "app/generated/frontend_bundle.hpp" in gitignore
