@@ -108,3 +108,13 @@ def test_codeql_uses_source_analysis_without_generated_bundle() -> None:
     assert "build-coverage/**" in config
     assert ".native-build/**" in config
     assert "app/generated/frontend_bundle.hpp" in gitignore
+
+
+def test_playwright_fallback_provisions_playwright_test_package() -> None:
+    playwright_config = (ROOT / "frontend/playwright.config.ts").read_text(encoding="utf8")
+    playwright_runner = (ROOT / "scripts/run-playwright.mjs").read_text(encoding="utf8")
+
+    assert '@playwright/test' in playwright_config
+    assert 'const playwrightTestPackage = "@playwright/test";' in playwright_runner
+    assert 'const playwrightVersion = "1.54.2";' in playwright_runner
+    assert '${playwrightTestPackage}@${playwrightVersion}' in playwright_runner

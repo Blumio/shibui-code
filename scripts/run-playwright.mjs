@@ -9,6 +9,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.resolve(__dirname, "..");
 const frontendDir = path.join(rootDir, "frontend");
 const requireFromRoot = createRequire(import.meta.url);
+const playwrightTestPackage = "@playwright/test";
+const playwrightVersion = "1.54.2";
 
 const action = process.argv[2];
 if (action !== "install" && action !== "test") {
@@ -25,7 +27,7 @@ function run(command, args, cwd = rootDir) {
 
 function hasLocalPlaywright() {
   try {
-    requireFromRoot.resolve("@playwright/test/package.json", { paths: [frontendDir] });
+    requireFromRoot.resolve(`${playwrightTestPackage}/package.json`, { paths: [frontendDir] });
     return true;
   } catch {
     return false;
@@ -45,15 +47,13 @@ function executeLocal(actionName) {
 }
 
 function executeNpx(actionName) {
+  const npxArgs = ["--yes", "-p", `${playwrightTestPackage}@${playwrightVersion}`, "playwright"];
+
   if (actionName === "install") {
-    return run("npx", ["--yes", "playwright@1.54.2", "install", "chromium"], frontendDir);
+    return run("npx", [...npxArgs, "install", "chromium"], frontendDir);
   }
 
-  return run(
-    "npx",
-    ["--yes", "playwright@1.54.2", "test", "--config", "playwright.config.ts"],
-    frontendDir,
-  );
+  return run("npx", [...npxArgs, "test", "--config", "playwright.config.ts"], frontendDir);
 }
 
 let result;
