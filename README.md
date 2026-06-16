@@ -1,6 +1,7 @@
 # Shibui-Code
 
 Shibui-Code is a distraction-free macOS code scribbling app for deliberate coding practice.
+TODO: Shibui (German explanation): https://www.japanwelt.de/blog/detail/sCategory/467/blogArticle/1599
 
 ![Shibui-Code icon](assets/icons/shibui-code.png)
 
