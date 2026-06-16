@@ -1,4 +1,5 @@
 import json
+import re
 from pathlib import Path
 
 
@@ -117,4 +118,9 @@ def test_playwright_fallback_provisions_playwright_test_package() -> None:
     assert '@playwright/test' in playwright_config
     assert 'const playwrightTestPackage = "@playwright/test";' in playwright_runner
     assert 'const playwrightVersion = "1.54.2";' in playwright_runner
+    assert 'const playwrightSpecifier = `${playwrightTestPackage}@${playwrightVersion}`;' in playwright_runner
     assert '${playwrightTestPackage}@${playwrightVersion}' in playwright_runner
+    assert re.search(
+        r'install"\s*,\s*"--no-save"\s*,\s*playwrightSpecifier',
+        playwright_runner,
+    )

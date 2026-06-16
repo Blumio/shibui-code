@@ -11,6 +11,7 @@ const frontendDir = path.join(rootDir, "frontend");
 const requireFromRoot = createRequire(import.meta.url);
 const playwrightTestPackage = "@playwright/test";
 const playwrightVersion = "1.54.2";
+const playwrightSpecifier = `${playwrightTestPackage}@${playwrightVersion}`;
 
 const action = process.argv[2];
 if (action !== "install" && action !== "test") {
@@ -46,21 +47,28 @@ function executeLocal(actionName) {
   return run("npm", ["--prefix", frontendDir, "exec", "playwright", "test", "--config", "playwright.config.ts"]);
 }
 
-function executeNpx(actionName) {
-  const npxArgs = ["--yes", "-p", `${playwrightTestPackage}@${playwrightVersion}`, "playwright"];
+function installPinnedPlaywright() {
+  return run("npm", ["--prefix", frontendDir, "install", "--no-save", playwrightSpecifier]);
+}
 
-  if (actionName === "install") {
-    return run("npx", [...npxArgs, "install", "chromium"], frontendDir);
+function executeFallback(actionName) {
+  const installResult = installPinnedPlaywright();
+  if (installResult.status !== 0) {
+    return installResult;
   }
 
-  return run("npx", [...npxArgs, "test", "--config", "playwright.config.ts"], frontendDir);
+  if (actionName === "install") {
+    return executeLocal("install");
+  }
+
+  return executeLocal("test");
 }
 
 let result;
 if (hasLocalPlaywright()) {
   result = executeLocal(action);
 } else {
-  result = executeNpx(action);
+  result = executeFallback(action);
 }
 
 if (result.status === 0) {
